@@ -29,8 +29,8 @@ public class ParameterModel implements Comparable<ParameterModel> {
 	private String id;
 	private String type;
 	private String title;
-	private List<String> optionValues = new ArrayList<String>();
-	private List<String> optionLabels = new ArrayList<String>();
+	private List<ParameterOption> options = new ArrayList<ParameterOption>();
+	private String defaultValue;
 	private String unit;
 	private String validator;
 
@@ -50,20 +50,20 @@ public class ParameterModel implements Comparable<ParameterModel> {
 		this.type = type;
 	}
 
-	public List<String> getOptionValues() {
-		return optionValues;
+	public List<ParameterOption> getOptions() {
+		return options;
 	}
 
-	public void setOptionValues(List<String> optionValues) {
-		this.optionValues = optionValues;
+	public void addOption(ParameterOption option) {
+		this.options.add(option);
 	}
 
-	public List<String> getOptionLabels() {
-		return optionLabels;
+	public String getDefaultValue() {
+		return this.defaultValue;
 	}
 
-	public void setOptionLabels(List<String> optionLabels) {
-		this.optionLabels = optionLabels;
+	public void setDefaultValue(String value) {
+		this.defaultValue = value;
 	}
 
 	public String getTitle() {

@@ -27,7 +27,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -477,14 +476,14 @@ public class LaboratoryUtil {
 	 * @param concept
 	 */
 	public static void generateParameterModels(List<ParameterModel> parameters,
-			Concept concept) {
+			Concept concept, Encounter encounter) {
 		if (concept.getConceptClass().getName().equalsIgnoreCase("LabSet")) {
 			List<Concept> concepts = getParameterConcepts(concept);
 			for (Concept c : concepts) {
-				generateParameterModels(parameters, c);
+				generateParameterModels(parameters, c, encounter);
 			}
 		} else {
-			ParameterModel parameter = generateParameterModel(concept);
+			ParameterModel parameter = generateParameterModel(concept, encounter);
 			parameters.add(parameter);
 		}
 	}
@@ -499,35 +498,39 @@ public class LaboratoryUtil {
 		return concepts;
 	}
 
-	private static ParameterModel generateParameterModel(Concept concept) {
+	private static ParameterModel generateParameterModel(Concept concept, Encounter encounter) {
 		ParameterModel parameter = new ParameterModel();
+		setDefaultParameterValue(concept, encounter, parameter);
 		if (concept.getDatatype().getName().equalsIgnoreCase("Text")) {
 			parameter.setId(concept.getName().getName().trim());
 			parameter.setType("text");
 		} else if (concept.getDatatype().getName().equalsIgnoreCase("Numeric")) {
 			parameter.setId(concept.getName().getName().trim());
-			parameter.setType("text");
+			parameter.setType("number");
 			parameter.setUnit(getUnit(concept));
 		} else if (concept.getDatatype().getName().equalsIgnoreCase("Coded")) {
 			parameter.setId(concept.getName().getName().trim());
 			parameter.setType("select");
-			parameter.getOptionValues().add("");
-			parameter.getOptionLabels().add("");
-			Set<Concept> options = new HashSet<Concept>();
 
 			for (ConceptAnswer ca : concept.getAnswers()) {
 				Concept c = ca.getAnswerConcept();
-				options.add(c);
-			}
-
-			for (Concept option : options) {
-				parameter.getOptionValues().add(option.getName().getName());
-				parameter.getOptionLabels().add(option.getName().getName());
+				parameter.addOption(new ParameterOption(c.getName().getName(), c.getName().getName()));
 			}
 		}
 		parameter.setValidator(parameter.getValidator() + " required");
-		parameter.setTitle(concept.getDatatype().getName());
+		parameter.setTitle(concept.getName().getName());
 		return parameter;
+	}
+
+	private static void setDefaultParameterValue(Concept concept, Encounter encounter, ParameterModel parameter) {
+		if (encounter != null) {
+			for (Obs obs : encounter.getAllObs()) {
+				if (concept.equals(obs.getConcept())) {
+					parameter.setDefaultValue(obs.getValueAsString(Context.getLocale()));
+					break;
+				}
+			} 
+		}
 	}
 
 	private static String getUnit(Concept concept) {
