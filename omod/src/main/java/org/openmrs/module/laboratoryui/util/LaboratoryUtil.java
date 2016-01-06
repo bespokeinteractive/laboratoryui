@@ -100,7 +100,7 @@ public class LaboratoryUtil {
 	 * @return
 	 */
 
-	public static List<TestModel> generateModelsForPrintWorkListFromTests(
+	public static List<TestModel> generateModelsForWorkSheet(
 			List<LabTest> tests, Map<Concept, Set<Concept>> testTreeMap,
 			String showResults) {
 
@@ -476,7 +476,8 @@ public class LaboratoryUtil {
 	 * @param concept
 	 */
 	public static void generateParameterModels(List<ParameterModel> parameters,
-			Concept concept, Encounter encounter) {
+			Concept concept,
+			Encounter encounter) {
 		if (concept.getConceptClass().getName().equalsIgnoreCase("LabSet")) {
 			List<Concept> concepts = getParameterConcepts(concept);
 			for (Concept c : concepts) {
@@ -517,7 +518,7 @@ public class LaboratoryUtil {
 				parameter.addOption(new ParameterOption(c.getName().getName(), c.getName().getName()));
 			}
 		}
-		parameter.setValidator(parameter.getValidator() + " required");
+		parameter.setValidator(" required");
 		parameter.setTitle(concept.getName().getName());
 		return parameter;
 	}

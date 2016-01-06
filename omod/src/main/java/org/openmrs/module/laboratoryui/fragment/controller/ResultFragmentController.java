@@ -24,7 +24,7 @@ import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.annotation.BindParams;
 import org.springframework.web.bind.annotation.RequestParam;
 
-public class LaboratoryResultFragmentController {
+public class ResultFragmentController {
 	public List<SimpleObject> getResultTemplate(@RequestParam("testId") Integer testId, UiUtils ui) {
 		LaboratoryService ls = Context.getService(LaboratoryService.class);
 		LabTest test = ls.getLaboratoryTest(testId);		

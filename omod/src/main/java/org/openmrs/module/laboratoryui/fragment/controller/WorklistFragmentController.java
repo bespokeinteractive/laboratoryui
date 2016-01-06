@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestParam;
 
-public class LaboratoryWorkListFragmentController {
+public class WorklistFragmentController {
 	private static Logger logger = LoggerFactory.getLogger(QueueFragmentController.class);
 
 	public void controller(FragmentModel model) {
@@ -63,7 +63,7 @@ public class LaboratoryWorkListFragmentController {
 			}
 			List<LabTest> laboratoryTests = ls.getAcceptedLaboratoryTests(date, phrase, allowableTests);			
 			List<TestModel> tests = LaboratoryUtil.generateModelsFromTests(laboratoryTests, testTreeMap);
-			simpleObjects = SimpleObject.fromCollection(tests, ui, "startDate", "patientIdentifier", "patientName", "gender", "age", "test.name", "testId", "orderId", "sampleId", "status");
+			simpleObjects = SimpleObject.fromCollection(tests, ui, "startDate", "patientIdentifier", "patientName", "gender", "age", "test.name", "investigation", "testId", "orderId", "sampleId", "status", "value");
 		} catch (ParseException e) {
 			e.printStackTrace();
 			logger.error("Error when parsing order date!", e.getMessage());

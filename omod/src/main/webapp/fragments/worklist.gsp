@@ -6,7 +6,7 @@
 			var date = jq("#date").val();
 			var phrase = jq("#phrase").val();
 			var investigation = jq("#investigation").val();
-			jq.getJSON('${ui.actionLink("laboratoryui", "LaboratoryWorkList", "searchWorkList")}',
+			jq.getJSON('${ui.actionLink("laboratoryui", "worklist", "searchWorkList")}',
 				{ 
 					"date" : date,
 					"phrase" : phrase,
@@ -155,7 +155,7 @@
 	}
 	
 	function getResultTemplate(testId) {
-		jq.getJSON('${ui.actionLink("laboratoryui", "laboratoryResult", "getResultTemplate")}',
+		jq.getJSON('${ui.actionLink("laboratoryui", "result", "getResultTemplate")}',
 			{ "testId" : testId }
 		).success(function(parameterOptions){
 			parameterOpts.parameterOptions.removeAll();
@@ -175,7 +175,7 @@
 		var dataString = form.serialize();
 		jq.ajax({
 			type: "POST",
-			url: '${ui.actionLink("laboratoryui", "laboratoryResult", "saveResult")}',
+			url: '${ui.actionLink("laboratoryui", "result", "saveResult")}',
 			data: dataString,
 			dataType: "json",
 			success: function(data) {
