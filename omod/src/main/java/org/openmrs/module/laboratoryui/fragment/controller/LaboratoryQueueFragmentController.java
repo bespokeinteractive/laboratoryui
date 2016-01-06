@@ -1,14 +1,15 @@
 package org.openmrs.module.laboratoryui.fragment.controller;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.openmrs.Concept;
 import org.openmrs.Order;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.hospitalcore.model.LabTest;
 import org.openmrs.module.laboratory.LaboratoryService;
 import org.openmrs.module.laboratory.util.LaboratoryConstants;
 import org.openmrs.module.laboratoryui.util.LaboratoryTestUtil;
@@ -17,42 +18,38 @@ import org.openmrs.ui.framework.SimpleObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 public class LaboratoryQueueFragmentController {
 	
 	private static Logger logger = LoggerFactory.getLogger(LaboratoryQueueFragmentController.class);
 
-	public String acceptLabTest(
+	public SimpleObject acceptLabTest(
 			@RequestParam("orderId") Integer orderId) {
 		Order order = Context.getOrderService().getOrder(orderId);
-		StringBuffer result = new StringBuffer();
 		if (order != null) {
 			try {
 				LaboratoryService ls = (LaboratoryService) Context.getService(LaboratoryService.class);
 				String sampleId = getSampleId(orderId);
 				Integer acceptedTestId = ls.acceptTest(order, sampleId);
 				if (acceptedTestId > 0) {
-					result.append("{ \"acceptedTestId\" : \"" + acceptedTestId + "\", \"sampleId\" : \"" + sampleId + "\", ");
-					result.append("\"status\" : \"success\" }");
+					return SimpleObject.create("acceptedTestId", acceptedTestId, "sampleId", sampleId, "status", "success");
 				} else {
-					result.append("{ \"status\" : \"fail\", ");
+					List<Object> simpleObjectElements = new ArrayList<Object>();
+					simpleObjectElements.add("status");
+					simpleObjectElements.add("fail");
+					simpleObjectElements.add("error");
 					if (acceptedTestId.equals(LaboratoryConstants.ACCEPT_TEST_RETURN_ERROR_EXISTING_SAMPLEID)) {
-						result.append("\"error\" : \"Existing sample id found\" }");
+						simpleObjectElements.add("Existing sample id found");
 					} else if (acceptedTestId == LaboratoryConstants.ACCEPT_TEST_RETURN_ERROR_EXISTING_TEST) {
-						result.append("\"error\" : \"Existing accepted test found\" }");
+						simpleObjectElements.add("Existing accepted test found");
 					}
+					return SimpleObject.create(simpleObjectElements);
 				}
-				return result.toString();
 			} catch (Exception e) {
-				result.append("{ \"status\" : \"fail\", ");
-				result.append("\"error\" : \"Error occured while saving test.\" }");
-				return result.toString();
+				return SimpleObject.create("status", "fail", "error", "Error occured while saving test.");
 			}
 		}
-		result.append("{ \"status\" : \"fail\", ");
-		result.append("\"error\" : \"Order {" + orderId + "} not found.\" }");
-		return result.toString();
+		return SimpleObject.create("status", "fail", "error", "Order {" + orderId + "} not found.");
 	}
 	
 	private String getSampleId(Integer orderId){
