@@ -1,4 +1,4 @@
-<% ui.includeJavascript("laboratoryui", "jquery.printElement.min.js") %>
+<% ui.includeJavascript("laboratoryui", "jQuery.print.js") %>
 
 <script>
 	jq(function(){
@@ -288,8 +288,8 @@ function saveSchedule() {
 			<td data-bind="text: startDate"></td>
 			<td data-bind="text: patientIdentifier"></td>
 			<td data-bind="text: patientName"></td>
-			<td data-bind="text: gender"></td>
 			<td data-bind="text: age"></td>
+			<td data-bind="text: gender"></td>
 			<td data-bind="text: sampleId"></td>
 			<td data-bind="text: investigation"></td>
 			<td data-bind="text: test.name"></td>
@@ -301,12 +301,14 @@ function saveSchedule() {
 jq(function(){
 	var worksheet = { items : ko.observableArray([]) };
 	ko.applyBindings(worksheet, jq("#worksheet")[0]);
+	jq("#worksheet").hide();
 	jq("#print-worklist").on("click", function() {
 		jq.getJSON('${ui.actionLink("laboratoryui", "worksheet", "getWorksheet")}',
 			{ 
 				"date" : jq("#date").val(),
 				"phrase" : jq("#phrase").val(),
-				"investigation" : jq("#investigation").val()
+				"investigation" : jq("#investigation").val(),
+				"showResults" : jq("#include-result").is(":checked")
 			}
 		).success(function(data) {
 			worksheet.items.removeAll();
@@ -319,7 +321,11 @@ jq(function(){
 });
 
 function printData() {
-	jq("#worksheet").printElement({printMode:'iframe'});
+	jq("#worksheet").print({
+            mediaPrint: false,
+            stylesheet: '${ui.resourceLink("referenceapplication","styles/referenceapplication.css")}',
+            iframe: true
+    });
 }
 </script>
 <!-- Worksheet -->
