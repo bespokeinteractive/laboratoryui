@@ -100,7 +100,7 @@ public class LaboratoryUtil {
 	 * @return
 	 */
 
-	public static List<TestModel> generateModelsForWorkSheet(
+	public static List<TestModel> generateModelsForWorksheet(
 			List<LabTest> tests, Map<Concept, Set<Concept>> testTreeMap,
 			String showResults) {
 

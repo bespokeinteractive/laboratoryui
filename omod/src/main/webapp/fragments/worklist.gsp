@@ -1,3 +1,5 @@
+<% ui.includeJavascript("laboratoryui", "jquery.printElement.min.js") %>
+
 <script>
 	jq(function(){
 		jq('#date').datepicker("option", "dateFormat", "dd/mm/yy");
@@ -40,6 +42,12 @@
 			<input type="button" value="Get patients" id="get-worklist"/>
 		</fieldset>
 	</form>
+</div>
+
+<div>
+	<label for="include-result">Include result</label>
+	<input type="checkbox" id="include-result" >
+	<button id="print-worklist">Print Worklist</button>
 </div>
 
 <table id="worklist">
@@ -261,3 +269,57 @@ function saveSchedule() {
 		ko.applyBindings(workList, jq("#worklist")[0]);
 	});
 </script>
+
+<!-- Worsheet -->
+<table id="worksheet">
+	<thead>
+		<th>Order Date</th>
+		<th>Patient Identifier</th>
+		<th>Name</th>
+		<th>Age</th>
+		<th>Gender</th>
+		<th>Sample Id</th>
+		<th>Lab</th>
+		<th>Test</th>
+		<th>Result</th>
+	</thead>
+	<tbody data-bind="foreach: items">
+		<tr>
+			<td data-bind="text: startDate"></td>
+			<td data-bind="text: patientIdentifier"></td>
+			<td data-bind="text: patientName"></td>
+			<td data-bind="text: gender"></td>
+			<td data-bind="text: age"></td>
+			<td data-bind="text: sampleId"></td>
+			<td data-bind="text: investigation"></td>
+			<td data-bind="text: test.name"></td>
+			<td data-bind="text: value"></td>
+		</tr>
+	</tbody>
+</table>
+<script>
+jq(function(){
+	var worksheet = { items : ko.observableArray([]) };
+	ko.applyBindings(worksheet, jq("#worksheet")[0]);
+	jq("#print-worklist").on("click", function() {
+		jq.getJSON('${ui.actionLink("laboratoryui", "worksheet", "getWorksheet")}',
+			{ 
+				"date" : jq("#date").val(),
+				"phrase" : jq("#phrase").val(),
+				"investigation" : jq("#investigation").val()
+			}
+		).success(function(data) {
+			worksheet.items.removeAll();
+			jq.each(data, function (index, item) {
+				worksheet.items.push(item);
+			});
+			printData();
+		});
+	});
+});
+
+function printData() {
+	jq("#worksheet").printElement({printMode:'iframe'});
+}
+</script>
+<!-- Worksheet -->

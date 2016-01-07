@@ -4,4 +4,4 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.0/moment.js"></script>
 
-${ ui.includeFragment("laboratoryui", "laboratoryWorkList") }
+${ ui.includeFragment("laboratoryui", "worklist") }

@@ -65,7 +65,6 @@ public class WorklistFragmentController {
 			List<TestModel> tests = LaboratoryUtil.generateModelsFromTests(laboratoryTests, testTreeMap);
 			simpleObjects = SimpleObject.fromCollection(tests, ui, "startDate", "patientIdentifier", "patientName", "gender", "age", "test.name", "investigation", "testId", "orderId", "sampleId", "status", "value");
 		} catch (ParseException e) {
-			e.printStackTrace();
 			logger.error("Error when parsing order date!", e.getMessage());
 		}
 		return simpleObjects;
