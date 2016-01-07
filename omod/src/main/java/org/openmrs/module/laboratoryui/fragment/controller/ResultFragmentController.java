@@ -10,6 +10,7 @@ import org.openmrs.Encounter;
 import org.openmrs.EncounterType;
 import org.openmrs.Location;
 import org.openmrs.Obs;
+import org.openmrs.Order;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.hospitalcore.BillingConstants;
 import org.openmrs.module.hospitalcore.model.LabTest;
@@ -54,6 +55,10 @@ public class ResultFragmentController {
 		encounter.setCreator(Context.getAuthenticatedUser());
 		encounter.setUuid(UUID.randomUUID().toString());
 		encounter.setEncounterDatetime(new Date());
+		
+		Order order = test.getOrder();
+		order.setDiscontinued(true);
+		order.setDiscontinuedDate(new Date());
 		
 		for (ResultModel resultModel : resultWrapper.getResults()) {
 			Concept concept = LaboratoryUtil.searchConcept(resultModel.getConceptName());

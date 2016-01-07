@@ -28,7 +28,7 @@
 			<input id="phrase"/>
 			<label for="investigation">Investigation</label>
 			<select name="investigation" id="investigation">
-				<option>Select an investigation</option>
+				<option value="0">ALL</option>
 				<% investigations.each { investigation -> %>
 					<option value="${investigation.id}">${investigation.name.name}</option>
 				<% } %>	

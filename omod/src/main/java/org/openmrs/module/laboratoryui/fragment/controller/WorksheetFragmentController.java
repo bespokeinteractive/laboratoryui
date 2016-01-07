@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestParam;
 
 public class WorksheetFragmentController {
-	private static Logger logger = LoggerFactory.getLogger(QueueFragmentController.class);
+	private static Logger logger = LoggerFactory.getLogger(WorksheetFragmentController.class);
 
 	public List<SimpleObject> getWorksheet(
 			@RequestParam(value = "date", required = false) String dateStr,
