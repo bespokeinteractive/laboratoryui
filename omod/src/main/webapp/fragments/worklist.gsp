@@ -48,6 +48,7 @@
 	<label for="include-result">Include result</label>
 	<input type="checkbox" id="include-result" >
 	<button id="print-worklist">Print Worklist</button>
+	<button id="export-worklist">Export Worklist</button>
 </div>
 
 <table id="worklist">
@@ -317,6 +318,13 @@ jq(function(){
 			});
 			printData();
 		});
+	});
+	
+	jq("#export-worklist").on("click", function() {
+		window.location = "/" + OPENMRS_CONTEXT_PATH + "/module/laboratory/download.form?" +
+			"date=" + jq("#date").val() + "&phrase=" + jq("#phrase").val() +
+			"&investigation=" + jq("#investigation").val() +
+			"&showResults=" + jq("#include-result").is(":checked");
 	});
 });
 
