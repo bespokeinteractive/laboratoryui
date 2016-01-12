@@ -15,6 +15,9 @@
 					"investigation" : investigation
 				}
 			).success(function(data) {
+				if (data.length === 0) {
+					jq().toastmessage('showInformationToast', "No match found!");
+				}
 				workList.items.removeAll();
 				jq.each(data, function(index, testInfo){
 					workList.items.push(testInfo);

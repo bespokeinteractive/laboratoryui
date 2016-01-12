@@ -6,17 +6,18 @@
 
 <div class="lab-tabs">
 	<ul>
+	    <li><a href="#queue">Queue</a></li>
 		<li><a href="#worklist">Worklist</a></li>
-		<li><a href="#patient-report">Patient Report</a></li>
 	</ul>
+	
+	<div id="queue">
+	    ${ ui.includeFragment("laboratoryui", "queue") }
+	</div>
 	
 	<div id="worklist">
 		${ ui.includeFragment("laboratoryui", "worklist") }
 	</div>
 	
-	<div id="patient-report">
-		${ ui.includeFragment("laboratoryui", "patientReport", [patientId: 33359]) }
-	</div>
 </div>
 
 <script>

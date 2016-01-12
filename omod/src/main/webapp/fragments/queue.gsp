@@ -1,7 +1,3 @@
-<% 
-	ui.decorateWith("appui", "standardEmrPage")
-%>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.0/moment.js"></script>
 
 <script>
@@ -114,6 +110,9 @@ jq(function(){
 				"currentPage" : 1
 			}
 		).success(function(data) {
+			if (data.length === 0) {
+				jq().toastmessage('showInformationToast', "No match found!");
+			}
 			queueData.tests.removeAll();
 			jq.each(data, function(index, testInfo){
 				queueData.tests.push(testInfo);
