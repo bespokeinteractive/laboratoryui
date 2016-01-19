@@ -102,7 +102,7 @@ jq(function(){
 		var date = jq("#date").val();
 		var phrase = jq("#phrase").val();
 		var investigation = jq("#investigation").val();
-		jq.getJSON('${ui.actionLink("laboratoryui", "Queue", "searchQueue")}',
+		jq.getJSON('${ui.actionLink("laboratoryapp", "Queue", "searchQueue")}',
 			{ 
 				"date" : date,
 				"phrase" : phrase,
@@ -111,7 +111,7 @@ jq(function(){
 			}
 		).success(function(data) {
 			if (data.length === 0) {
-				jq().toastmessage('showInformationToast', "No match found!");
+				jq().toastmessage('showNoticeToast', "No match found!");
 			}
 			queueData.tests.removeAll();
 			jq.each(data, function(index, testInfo){
@@ -130,7 +130,7 @@ var details = { 'patientName' : 'Patient Name', 'startDate' : 'Start Date', 'tes
 var testDetails = { details : ko.observable(details) }
 
 function acceptTest(orderId) {
-	jq.post('${ui.actionLink("laboratoryui", "LaboratoryQueue", "acceptLabTest")}',
+	jq.post('${ui.actionLink("laboratoryapp", "LaboratoryQueue", "acceptLabTest")}',
 		{ 'orderId' : orderId },
 		function (data) {
 			if (data.status === "success") {
@@ -180,7 +180,7 @@ jq(function(){
 });
 
 function saveSchedule() {
-	jq.post('${ui.actionLink("laboratoryui", "LaboratoryQueue", "rescheduleTest")}',
+	jq.post('${ui.actionLink("laboratoryapp", "LaboratoryQueue", "rescheduleTest")}',
 		{ "orderId" : orderId.val(), "rescheduledDate" : moment(scheduleDate.val()).format('DD/MM/YYYY') },
 		function (data) {
 			if (data.status === "fail") {

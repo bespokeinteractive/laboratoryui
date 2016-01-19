@@ -11,11 +11,11 @@
 	</ul>
 	
 	<div id="queue">
-	    ${ ui.includeFragment("laboratoryui", "queue") }
+	    ${ ui.includeFragment("laboratoryapp", "queue") }
 	</div>
 	
 	<div id="worklist">
-		${ ui.includeFragment("laboratoryui", "worklist") }
+		${ ui.includeFragment("laboratoryapp", "worklist") }
 	</div>
 	
 </div>

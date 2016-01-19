@@ -1,4 +1,4 @@
-<% ui.includeJavascript("laboratoryui", "jQuery.print.js") %>
+<% ui.includeJavascript("laboratoryapp", "jQuery.print.js") %>
 
 <script>
 	jq(function(){
@@ -8,7 +8,7 @@
 			var date = jq("#date").val();
 			var phrase = jq("#phrase").val();
 			var investigation = jq("#investigation").val();
-			jq.getJSON('${ui.actionLink("laboratoryui", "worklist", "searchWorkList")}',
+			jq.getJSON('${ui.actionLink("laboratoryapp", "worklist", "searchWorkList")}',
 				{ 
 					"date" : date,
 					"phrase" : phrase,
@@ -129,7 +129,6 @@
 		</fieldset>
 	</form>
 </div>
-
 <script>
 	var dialog, 
 	form, 
@@ -167,7 +166,7 @@
 	}
 	
 	function getResultTemplate(testId) {
-		jq.getJSON('${ui.actionLink("laboratoryui", "result", "getResultTemplate")}',
+		jq.getJSON('${ui.actionLink("laboratoryapp", "result", "getResultTemplate")}',
 			{ "testId" : testId }
 		).success(function(parameterOptions){
 			parameterOpts.parameterOptions.removeAll();
@@ -187,12 +186,12 @@
 		var dataString = form.serialize();
 		jq.ajax({
 			type: "POST",
-			url: '${ui.actionLink("laboratoryui", "result", "saveResult")}',
+			url: '${ui.actionLink("laboratoryapp", "result", "saveResult")}',
 			data: dataString,
 			dataType: "json",
 			success: function(data) {
 				if (data.status === "success") {
-					jq().toastmessage('showSuccessToast', data.message);
+					jq().toastmessage('showNoticeToast', data.message);
 					dialog.dialog("close");
 				}
 			}
@@ -243,7 +242,7 @@ function reorder(orderId) {
 }
 
 function saveSchedule() {
-	jq.post('${ui.actionLink("laboratoryui", "LaboratoryQueue", "rescheduleTest")}',
+	jq.post('${ui.actionLink("laboratoryapp", "LaboratoryQueue", "rescheduleTest")}',
 		{ "orderId" : orderId.val(), "rescheduledDate" : moment(scheduleDate.val()).format('DD/MM/YYYY') },
 		function (data) {
 			if (data.status === "fail") {
@@ -307,7 +306,7 @@ jq(function(){
 	ko.applyBindings(worksheet, jq("#worksheet")[0]);
 	jq("#worksheet").hide();
 	jq("#print-worklist").on("click", function() {
-		jq.getJSON('${ui.actionLink("laboratoryui", "worksheet", "getWorksheet")}',
+		jq.getJSON('${ui.actionLink("laboratoryapp", "worksheet", "getWorksheet")}',
 			{ 
 				"date" : jq("#date").val(),
 				"phrase" : jq("#phrase").val(),
