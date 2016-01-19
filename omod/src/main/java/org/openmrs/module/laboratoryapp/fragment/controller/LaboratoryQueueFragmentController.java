@@ -1,4 +1,4 @@
-package org.openmrs.module.laboratoryui.fragment.controller;
+package org.openmrs.module.laboratoryapp.fragment.controller;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -12,8 +12,8 @@ import org.openmrs.Order;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.laboratory.LaboratoryService;
 import org.openmrs.module.laboratory.util.LaboratoryConstants;
-import org.openmrs.module.laboratoryui.util.LaboratoryTestUtil;
-import org.openmrs.module.laboratoryui.util.LaboratoryUtil;
+import org.openmrs.module.laboratoryapp.util.LaboratoryTestUtil;
+import org.openmrs.module.laboratoryapp.util.LaboratoryUtil;
 import org.openmrs.ui.framework.SimpleObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

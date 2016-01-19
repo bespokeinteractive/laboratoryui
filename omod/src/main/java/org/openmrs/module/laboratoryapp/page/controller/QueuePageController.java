@@ -1,4 +1,4 @@
-package org.openmrs.module.laboratoryui.page.controller;
+package org.openmrs.module.laboratoryapp.page.controller;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

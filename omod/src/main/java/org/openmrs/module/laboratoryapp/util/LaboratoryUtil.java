@@ -18,7 +18,7 @@
  *
  **/
 
-package org.openmrs.module.laboratoryui.util;
+package org.openmrs.module.laboratoryapp.util;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

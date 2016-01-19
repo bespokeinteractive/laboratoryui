@@ -1,14 +1,14 @@
 [
     {
-        "id": "laboratoryui.labApp",        // unique id for this app, unique across all apps, typically starts with your module id
+        "id": "laboratoryapp.labApp",        // unique id for this app, unique across all apps, typically starts with your module id
         "description": "App for managing lab operations",        // plain text or a message code (not displayed to end-users)
         "extensions": [
             {
-                "id": "laboratoryui.labAppHomepageLink",
+                "id": "laboratoryapp.labAppHomepageLink",
                 "extensionPointId": "org.openmrs.referenceapplication.homepageLink",
                 "type": "link",
                 "label": "Laboratory",        // text or message code (this is shown to the user)
-                "url": "laboratoryui/main.page",        // clicking on the app icon goes to this link
+                "url": "laboratoryapp/main.page",        // clicking on the app icon goes to this link
                 "icon": "icon-tasks",        // see the uicommons style guide icons
                 "requiredPrivilege": "App: coreapps.activeVisits"        // require this privilege to show the link
             }

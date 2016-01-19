@@ -1,4 +1,4 @@
-package org.openmrs.module.laboratoryui.fragment.controller;
+package org.openmrs.module.laboratoryapp.fragment.controller;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -16,10 +16,10 @@ import org.openmrs.module.hospitalcore.BillingConstants;
 import org.openmrs.module.hospitalcore.model.LabTest;
 import org.openmrs.module.hospitalcore.util.GlobalPropertyUtil;
 import org.openmrs.module.laboratory.LaboratoryService;
-import org.openmrs.module.laboratoryui.util.LaboratoryUtil;
-import org.openmrs.module.laboratoryui.util.ParameterModel;
-import org.openmrs.module.laboratoryui.util.ResultModel;
-import org.openmrs.module.laboratoryui.util.ResultModelWrapper;
+import org.openmrs.module.laboratoryapp.util.LaboratoryUtil;
+import org.openmrs.module.laboratoryapp.util.ParameterModel;
+import org.openmrs.module.laboratoryapp.util.ResultModel;
+import org.openmrs.module.laboratoryapp.util.ResultModelWrapper;
 import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.annotation.BindParams;
