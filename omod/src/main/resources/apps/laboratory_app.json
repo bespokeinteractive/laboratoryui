@@ -8,7 +8,8 @@
                 "extensionPointId": "org.openmrs.referenceapplication.homepageLink",
                 "type": "link",
                 "label": "Laboratory",        // text or message code (this is shown to the user)
-                "url": "laboratoryapp/main.page",        // clicking on the app icon goes to this link
+                "url": "laboratoryapp/main.page",        // clicking on the app icon goes to this link,
+                "order": 5,
                 "icon": "icon-tasks",        // see the uicommons style guide icons
                 "requiredPrivilege": "App: coreapps.activeVisits"        // require this privilege to show the link
             }
