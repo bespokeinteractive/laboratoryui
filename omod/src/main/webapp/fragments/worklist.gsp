@@ -5,7 +5,7 @@
 		jq('#date').datepicker("option", "dateFormat", "dd/mm/yy");
 		
 		jq('#get-worklist').on('click', function () {
-			var date = jq("#date").val();
+			var date = moment(jq('#accepted-date-field').val()).format('DD/MM/YYYY');
 			var phrase = jq("#phrase").val();
 			var investigation = jq("#investigation").val();
 			jq.getJSON('${ui.actionLink("laboratoryapp", "worklist", "searchWorkList")}',
@@ -16,7 +16,7 @@
 				}
 			).success(function(data) {
 				if (data.length === 0) {
-					jq().toastmessage('showInformationToast', "No match found!");
+					jq().toastmessage('showNoticeToast', "No match found!");
 				}
 				workList.items.removeAll();
 				jq.each(data, function(index, testInfo){
@@ -30,8 +30,7 @@
 <div>
 	<form>
 		<fieldset>
-			<label for="date">Date</label>
-			<input class="date" id="date" name="date" value="${currentDate}" />
+			${ui.includeFragment("uicommons", "field/datetimepicker", [id: 'accepted-date', label: 'Date', formFieldName: 'acceptedDate', useTime: false, defaultToday: true])}
 			<label for="phrase">Patient Identifier/Name</label>
 			<input id="phrase"/>
 			<label for="investigation">Investigation</label>
@@ -308,7 +307,7 @@ jq(function(){
 	jq("#print-worklist").on("click", function() {
 		jq.getJSON('${ui.actionLink("laboratoryapp", "worksheet", "getWorksheet")}',
 			{ 
-				"date" : jq("#date").val(),
+				"date" : moment(jq('#accepted-date-field').val()).format('DD/MM/YYYY'),
 				"phrase" : jq("#phrase").val(),
 				"investigation" : jq("#investigation").val(),
 				"showResults" : jq("#include-result").is(":checked")
@@ -324,7 +323,7 @@ jq(function(){
 	
 	jq("#export-worklist").on("click", function() {
 		window.location = "/" + OPENMRS_CONTEXT_PATH + "/module/laboratory/download.form?" +
-			"date=" + jq("#date").val() + "&phrase=" + jq("#phrase").val() +
+			"date=" + moment(jq('#accepted-date-field').val()).format('DD/MM/YYYY') + "&phrase=" + jq("#phrase").val() +
 			"&investigation=" + jq("#investigation").val() +
 			"&showResults=" + jq("#include-result").is(":checked");
 	});

@@ -18,8 +18,7 @@
 <div>
 	<form>
 		<fieldset>
-			<label for="date">Date</label>
-			<input id="date" value="${currentDate}" style="text-align:right;"/>
+			${ui.includeFragment("uicommons", "field/datetimepicker", [id: 'referred-date', label: 'Date', formFieldName: 'referredDate', useTime: false, defaultToday: true])}
 			<label for="phrase">Patient Identifier/Name</label>
 			<input id="phrase"/>
 			<label for="investigation">Investigation</label>
@@ -99,12 +98,12 @@
 <script>
 jq(function(){
 	jq("#get-tests").on("click", function(){
-		var date = jq("#date").val();
+		var date = jq("#referred-date-field").val();
 		var phrase = jq("#phrase").val();
 		var investigation = jq("#investigation").val();
 		jq.getJSON('${ui.actionLink("laboratoryapp", "Queue", "searchQueue")}',
 			{ 
-				"date" : date,
+				"date" : moment(date).format('DD/MM/YYYY'),
 				"phrase" : phrase,
 				"investigation" : investigation,
 				"currentPage" : 1
