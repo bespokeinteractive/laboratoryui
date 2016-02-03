@@ -71,7 +71,8 @@ public class ResultFragmentController {
 		encounter = Context.getEncounterService().saveEncounter(encounter);
 		
 		test.setEncounter(encounter);
-		ls.saveLaboratoryTest(test);
+		test = ls.saveLaboratoryTest(test);
+		ls.completeTest(test);
 		
 		return SimpleObject.create("status", "success", "message", "Saved!");
 	}

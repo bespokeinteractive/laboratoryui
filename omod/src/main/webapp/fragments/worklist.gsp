@@ -1,9 +1,7 @@
 <% ui.includeJavascript("laboratoryapp", "jQuery.print.js") %>
 
 <script>
-	jq(function(){
-		jq('#date').datepicker("option", "dateFormat", "dd/mm/yy");
-		
+	jq(function(){		
 		jq('#get-worklist').on('click', function () {
 			var date = moment(jq('#accepted-date-field').val()).format('DD/MM/YYYY');
 			var phrase = jq("#phrase").val();
@@ -55,61 +53,69 @@
 
 <table id="worklist">
 	<thead>
-		<th>Sample ID</th>	
-		<th>Date</th>
-		<th>Patient ID</th>
-		<th>Name</th>
-		<th>Gender</th>
-		<th>Age</th>
-		<th>Test</th>
-		<th>Results</th>
-		<th>Reorder</th>
+		<tr>
+			<th>Sample ID</th>	
+			<th>Date</th>
+			<th>Patient ID</th>
+			<th>Name</th>
+			<th>Gender</th>
+			<th>Age</th>
+			<th>Test</th>
+			<th>Results</th>
+			<th>Reorder</th>
+		</tr>
 	</thead>
 	<tbody data-bind="foreach: items">
-		<td data-bind="text: sampleId"></td>
-		<td data-bind="text: startDate"></td>
-		<td data-bind="text: patientIdentifier"></td>
-		<td data-bind="text: patientName"></td>
-		<td data-bind="text: gender"></td>
-		<td>
-			<span data-bind="if: age < 1">Less than 1 year</span>
-			<!-- ko if: age > 1 -->
-				<span data-bind="value: age"></span>
-			<!-- /ko -->
-		</td>
-		<td data-bind="text: test.name"></td>
-		<td> 
-			<a data-bind="attr: { href : 'javascript:showResultForm(' + testId + ')' }">Enter Result</a>
-		</td>
-		<td>
-			<a data-bind="attr: { href : 'javascript:reorder(' + orderId + ')' }">Re-order</a>
-		</td>
+		<tr>
+			<td data-bind="text: sampleId"></td>
+			<td data-bind="text: startDate"></td>
+			<td data-bind="text: patientIdentifier"></td>
+			<td data-bind="text: patientName"></td>
+			<td data-bind="text: gender"></td>
+			<td>
+				<span data-bind="if: age < 1">Less than 1 year</span>
+				<!-- ko if: age > 1 -->
+					<span data-bind="value: age"></span>
+				<!-- /ko -->
+			</td>
+			<td data-bind="text: test.name"></td>
+			<td> 
+				<a data-bind="click: showResultForm, attr: { href : '#' }">Enter Result</a>
+			</td>
+			<td>
+				<a data-bind="attr: { href : 'javascript:reorder(' + orderId + ')' }">Re-order</a>
+			</td>
+		</tr>
 	</tbody>
 </table>
 
 <div id="result-form" title="Results">
 	<form>
-		<fieldset>
-			<input type="hidden" name="wrap.testId" id="test-id" />
-			<div data-bind="foreach: parameterOptions">
-				<input type="hidden" data-bind="attr: { 'name' : 'wrap.results[' + \$index() + '].conceptName' }, value: title" >
-				<p data-bind="text: 'Patient Name: ' + patientName"></p> 
-				<p data-bind="text: 'Test: ' + testName"></p>
-				<p data-bind="text: 'Date: ' + startDate"></p>
-				<div data-bind="if: type.toLowerCase() === 'select'">
-					<label for="result-option" class="input-position-class left" data-bind="text: title"></label>
+		<input type="hidden" name="wrap.testId" id="test-id" />
+		<div data-bind="if: parameterOptions()[0]">
+			<p data-bind="text: 'Patient Name: ' + parameterOptions()[0].patientName"></p> 
+			<p data-bind="text: 'Test: ' + parameterOptions()[0].testName"></p>
+			<p data-bind="text: 'Date: ' + parameterOptions()[0].startDate"></p>
+		</div>
+		<div data-bind="foreach: parameterOptions">
+			<input type="hidden" data-bind="attr: { 'name' : 'wrap.results[' + \$index() + '].conceptName' }, value: title" >
+			<div data-bind="if: type.toLowerCase() === 'select'">
+				<p class="margin-left left">
+					<label for="result-option" class="input-position-class" data-bind="text: title"></label>
 					<select id="result-option" 
 						data-bind="attr : { 'name' : 'wrap.results[' + \$index() + '].selectedOption' },
 							foreach: options">
 						<option data-bind="attr: { name : value, selected : (\$parent.defaultValue === value) }, text: label"></option>
 					</select>
-				</div>
-				<div data-bind="if: type.toLowerCase() !== 'select'">
-					<label for="result-text" data-bind="text: title"></label>
-					<input class="result-text" data-bind="attr : { 'type' : type, 'name' : 'wrap.results[' + \$index() + '].value' }" >
-				</div>
+				</p>
 			</div>
-		</fieldset>
+			<div data-bind="if: type.toLowerCase() !== 'select'">
+				<p class="margin-left left">
+					<label for="result-text" data-bind="text: title"></label>
+					<input class="result-text" data-bind="attr : { 'type' : type, 'name' : 'wrap.results[' + \$index() + '].value', value : defaultValue }" >
+				</p>
+			</div>
+		</div>
 	</form>
 </div>
 
@@ -130,7 +136,8 @@
 </div>
 <script>
 	var dialog, 
-	form, 
+	form,
+	selectedTestDetails,
 	parameterOpts = { parameterOptions : ko.observableArray([]) };
 	
 	jq(function(){
@@ -138,8 +145,8 @@
 		
 		dialog = jq("#result-form").dialog({
 			autoOpen: false,
+			width: 600,
 			modal: true,
-			width: 350,
 			buttons: {
 				Save: saveResult,
 				Cancel: function() {
@@ -158,9 +165,10 @@
 		});
 	});
 	
-	function showResultForm(testId) {
-		getResultTemplate(testId);
-		form.find("#test-id").val(testId);
+	function showResultForm(testDetail) {
+		selectedTestDetails = testDetail;
+		getResultTemplate(testDetail.testId);
+		form.find("#test-id").val(testDetail.testId);
 		dialog.dialog( "open" );
 	}
 	
@@ -191,6 +199,7 @@
 			success: function(data) {
 				if (data.status === "success") {
 					jq().toastmessage('showNoticeToast', data.message);
+					workList.items.remove(selectedTestDetails);
 					dialog.dialog("close");
 				}
 			}
@@ -338,3 +347,8 @@ function printData() {
 }
 </script>
 <!-- Worksheet -->
+<style>
+.margin-left {
+	margin-left: 10px;
+}
+</style>
