@@ -30,7 +30,7 @@
 <div>
 	<form>
 		<fieldset>
-			${ui.includeFragment("uicommons", "field/datetimepicker", [id: 'accepted-date', label: 'Date', formFieldName: 'acceptedDate', useTime: false, defaultToday: true])}
+			${ui.includeFragment("uicommons", "field/datetimepicker", [id: 'accepted-date', label: 'Date Accepted', formFieldName: 'acceptedDate', useTime: false, defaultToday: true])}
 			<label for="phrase">Patient Identifier/Name</label>
 			<input id="phrase"/>
 			<label for="investigation">Investigation</label>
@@ -241,7 +241,7 @@ function reorder(orderId) {
 }
 
 function saveSchedule() {
-	jq.post('${ui.actionLink("laboratoryapp", "LaboratoryQueue", "rescheduleTest")}',
+	jq.post('${ui.actionLink("laboratoryapp", "queue", "rescheduleTest")}',
 		{ "orderId" : orderId.val(), "rescheduledDate" : moment(scheduleDate.val()).format('DD/MM/YYYY') },
 		function (data) {
 			if (data.status === "fail") {

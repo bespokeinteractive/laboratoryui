@@ -18,7 +18,7 @@
 <div>
 	<form>
 		<fieldset>
-			${ui.includeFragment("uicommons", "field/datetimepicker", [id: 'referred-date', label: 'Date', formFieldName: 'referredDate', useTime: false, defaultToday: true])}
+			${ui.includeFragment("uicommons", "field/datetimepicker", [id: 'referred-date', label: 'Date Ordered', formFieldName: 'referredDate', useTime: false, defaultToday: true])}
 			<label for="phrase">Patient Identifier/Name</label>
 			<input id="phrase"/>
 			<label for="investigation">Investigation</label>
@@ -129,7 +129,7 @@ var details = { 'patientName' : 'Patient Name', 'startDate' : 'Start Date', 'tes
 var testDetails = { details : ko.observable(details) }
 
 function acceptTest(orderId) {
-	jq.post('${ui.actionLink("laboratoryapp", "LaboratoryQueue", "acceptLabTest")}',
+	jq.post('${ui.actionLink("laboratoryapp", "queue", "acceptLabTest")}',
 		{ 'orderId' : orderId },
 		function (data) {
 			if (data.status === "success") {
@@ -179,7 +179,7 @@ jq(function(){
 });
 
 function saveSchedule() {
-	jq.post('${ui.actionLink("laboratoryapp", "LaboratoryQueue", "rescheduleTest")}',
+	jq.post('${ui.actionLink("laboratoryapp", "queue", "rescheduleTest")}',
 		{ "orderId" : orderId.val(), "rescheduledDate" : moment(scheduleDate.val()).format('DD/MM/YYYY') },
 		function (data) {
 			if (data.status === "fail") {
