@@ -6,12 +6,12 @@
 
         jq('#get-results').on('click', function () {
             var date = moment(jq('#accepted-date-field').val()).format('DD/MM/YYYY');
-            var phrase = jq("#phrase").val();
+            var searchResultsFor = jq("#search-results-for").val();
             var investigation = jq("#investigation").val();
             jq.getJSON('${ui.actionLink("laboratoryapp", "results", "searchForResults")}',
                     {
                         "date" : date,
-                        "phrase" : phrase,
+                        "phrase" : searchResultsFor,
                         "investigation" : investigation
                     }
             ).success(function(data) {
@@ -31,8 +31,8 @@
     <form>
         <fieldset>
             ${ui.includeFragment("uicommons", "field/datetimepicker", [id: 'accepted-date', label: 'Date', formFieldName: 'acceptedDate', useTime: false, defaultToday: true])}
-            <label for="phrase">Patient Identifier/Name</label>
-            <input id="phrase"/>
+            <label for="search-results-for">Patient Identifier/Name</label>
+            <input id="search-results-for"/>
             <label for="investigation">Investigation</label>
             <select name="investigation" id="investigation">
                 <option>Select an investigation</option>

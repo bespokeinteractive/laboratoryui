@@ -4,12 +4,12 @@
 	jq(function(){		
 		jq('#get-worklist').on('click', function () {
 			var date = moment(jq('#accepted-date-field').val()).format('DD/MM/YYYY');
-			var phrase = jq("#phrase").val();
+			var searchWorklistFor = jq("#search-worklist-for").val();
 			var investigation = jq("#investigation").val();
 			jq.getJSON('${ui.actionLink("laboratoryapp", "worklist", "searchWorkList")}',
 				{ 
 					"date" : date,
-					"phrase" : phrase,
+					"phrase" : searchWorklistFor,
 					"investigation" : investigation
 				}
 			).success(function(data) {
@@ -29,8 +29,8 @@
 	<form>
 		<fieldset>
 			${ui.includeFragment("uicommons", "field/datetimepicker", [id: 'accepted-date', label: 'Date Accepted', formFieldName: 'acceptedDate', useTime: false, defaultToday: true])}
-			<label for="phrase">Patient Identifier/Name</label>
-			<input id="phrase"/>
+			<label for="search-worklist-for">Patient Identifier/Name</label>
+			<input id="search-worklist-for"/>
 			<label for="investigation">Investigation</label>
 			<select name="investigation" id="investigation">
 				<option>Select an investigation</option>
@@ -317,7 +317,7 @@ jq(function(){
 		jq.getJSON('${ui.actionLink("laboratoryapp", "worksheet", "getWorksheet")}',
 			{ 
 				"date" : moment(jq('#accepted-date-field').val()).format('DD/MM/YYYY'),
-				"phrase" : jq("#phrase").val(),
+				"phrase" : jq("#search-worklist-for").val(),
 				"investigation" : jq("#investigation").val(),
 				"showResults" : jq("#include-result").is(":checked")
 			}
@@ -332,7 +332,7 @@ jq(function(){
 	
 	jq("#export-worklist").on("click", function() {
 		window.location = "/" + OPENMRS_CONTEXT_PATH + "/module/laboratory/download.form?" +
-			"date=" + moment(jq('#accepted-date-field').val()).format('DD/MM/YYYY') + "&phrase=" + jq("#phrase").val() +
+			"date=" + moment(jq('#accepted-date-field').val()).format('DD/MM/YYYY') + "&phrase=" + jq("#search-worklist-for").val() +
 			"&investigation=" + jq("#investigation").val() +
 			"&showResults=" + jq("#include-result").is(":checked");
 	});
