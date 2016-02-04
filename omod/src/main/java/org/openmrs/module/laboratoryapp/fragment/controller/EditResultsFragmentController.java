@@ -22,7 +22,7 @@ import java.util.*;
 /**
  * Created by Francis on 2/3/2016.
  */
-public class ResultsFragmentController {
+public class EditResultsFragmentController {
     private static Logger logger = LoggerFactory.getLogger(QueueFragmentController.class);
 
     public void controller(FragmentModel model) {

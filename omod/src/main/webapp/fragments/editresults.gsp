@@ -71,16 +71,16 @@
     </td>
     <td data-bind="text: test.name"></td>
     <td>
-        <a data-bind="attr: { href : 'javascript:showReSultForm(' + testId + ')' }">Edit Result</a>
+        <a data-bind="attr: { href : 'javascript:showEditResultForm(' + testId + ')' }">Edit Result</a>
     </td>
     </tbody>
 </table>
 
-<div id="myresult-form" title="Results">
+<div id="edit-result-form" title="Results">
     <form>
         <fieldset>
-            <input type="hidden" name="wrap.testId" id="testresult-id" />
-            <div data-bind="foreach: resultsParameterOptions">
+            <input type="hidden" name="wrap.testId" id="edit-result-id" />
+            <div data-bind="foreach: editResultsParameterOptions">
                 <input type="hidden" data-bind="attr: { 'name' : 'wrap.results[' + \$index() + '].conceptName' }, value: title" >
                 <p data-bind="text: 'Patient Name: ' + patientName"></p>
                 <p data-bind="text: 'Test: ' + testName"></p>
@@ -111,59 +111,59 @@
 
 
 <script>
-    var resultsDialog,
-            resultsForm,
-            resultsParameterOpts = { resultsParameterOptions : ko.observableArray([]) };
+    var editResultsDialog,
+            editResultsForm,
+            editResultsParameterOpts = { editResultsParameterOptions : ko.observableArray([]) };
 
     jq(function(){
-        ko.applyBindings(resultsParameterOpts, jq("#myresult-form")[0]);
+        ko.applyBindings(editResultsParameterOpts, jq("#edit-result-form")[0]);
 
-        resultsDialog = jq("#myresult-form").dialog({
+        editResultsDialog = jq("#edit-result-form").dialog({
             autoOpen: false,
             modal: true,
             width: 350,
             buttons: {
-                Save: saveReSult,
+                Save: saveEditResult,
                 Cancel: function() {
-                    resultsDialog.dialog( "close" );
+                    editResultsDialog.dialog( "close" );
                 }
             },
             close: function() {
-                resultsForm[0].reset();
+                editResultsForm[0].reset();
             }
         });
 
-        resultsForm = resultsDialog.find( "form" ).on( "submit", function( event ) {
+        editResultsForm = editResultsDialog.find( "form" ).on( "submit", function( event ) {
             event.preventDefault();
-            saveReSult();
+            saveEditResult();
         });
     });
 
-    function showReSultForm(testId) {
-        getResultTempLate(testId);
-        resultsForm.find("#testresult-id").val(testId);
-        resultsDialog.dialog( "open" );
+    function showEditResultForm(testId) {
+        getEditResultTempLate(testId);
+        editResultsForm.find("#edit-result-id").val(testId);
+        editResultsDialog.dialog( "open" );
     }
 
-    function getResultTempLate(testId) {
+    function getEditResultTempLate(testId) {
         jq.getJSON('${ui.actionLink("laboratoryapp", "result", "getResultTemplate")}',
                 { "testId" : testId }
-        ).success(function(resultsParameterOptions){
-                    resultsParameterOpts.resultsParameterOptions.removeAll();
+        ).success(function(editResultsParameterOptions){
+                    editResultsParameterOpts.editResultsParameterOptions.removeAll();
                     var details = ko.utils.arrayFirst(result.items(), function(item) {
                         return item.testId == testId;
                     });
-                    jq.each(resultsParameterOptions, function(index, resultsParameterOption) {
-                        resultsParameterOption['patientName'] = details.patientName;
-                        resultsParameterOption['testName'] = details.test.name;
-                        resultsParameterOption['startDate'] = details.startDate;
-                        resultsParameterOpts.resultsParameterOptions.push(resultsParameterOption);
+                    jq.each(editResultsParameterOptions, function(index, editResultsParameterOption) {
+                        editResultsParameterOption['patientName'] = details.patientName;
+                        editResultsParameterOption['testName'] = details.test.name;
+                        editResultsParameterOption['startDate'] = details.startDate;
+                        editResultsParameterOpts.editResultsParameterOptions.push(editResultsParameterOption);
                     });
                 });
     }
 
-    function saveReSult(){
-        var dataString = resultsForm.serialize();
+    function saveEditResult(){
+        var dataString = editResultsForm.serialize();
         jq.ajax({
             type: "POST",
             url: '${ui.actionLink("laboratoryapp", "result", "saveResult")}',
@@ -172,7 +172,7 @@
             success: function(data) {
                 if (data.status === "success") {
                     jq().toastmessage('showNoticeToast', data.message);
-                    resultsDialog.dialog("close");
+                    editResultsDialog.dialog("close");
                 }
             }
         });

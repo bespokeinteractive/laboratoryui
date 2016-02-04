@@ -20,7 +20,7 @@
 	</div>
 
 	<div id="results">
-		${ ui.includeFragment("laboratoryapp", "results") }
+		${ ui.includeFragment("laboratoryapp", "editResults") }
 	</div>
 	
 </div>
