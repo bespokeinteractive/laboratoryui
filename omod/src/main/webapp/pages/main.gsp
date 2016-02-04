@@ -8,6 +8,7 @@
 	<ul>
 	    <li><a href="#queue">Queue</a></li>
 		<li><a href="#worklist">Worklist</a></li>
+		<li><a href="#results">Results</a></li>
 	</ul>
 	
 	<div id="queue">
@@ -16,6 +17,10 @@
 	
 	<div id="worklist">
 		${ ui.includeFragment("laboratoryapp", "worklist") }
+	</div>
+
+	<div id="results">
+		${ ui.includeFragment("laboratoryapp", "results") }
 	</div>
 	
 </div>
