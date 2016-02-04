@@ -8,7 +8,7 @@
             var date = moment(jq('#accepted-date-field').val()).format('DD/MM/YYYY');
             var phrase = jq("#phrase").val();
             var investigation = jq("#investigation").val();
-            jq.getJSON('${ui.actionLink("laboratoryapp", "results", "searchWorkList")}',
+            jq.getJSON('${ui.actionLink("laboratoryapp", "results", "searchForResults")}',
                     {
                         "date" : date,
                         "phrase" : phrase,
@@ -93,13 +93,16 @@
                         <option data-bind="attr: { name : value, selected : (\$parent.defaultValue === value) }, text: label"></option>
                     </select>
                 </div>
-                <div data-bind="if: type && type.toLowerCase() !== 'select'">
-                    <label for="result-text" data-bind="text: title"></label>
-                    <input id="result-text" class="result-text" data-bind="attr : { 'type' : type, 'name' : 'wrap.results[' + \$index() + '].value' }" >
-                </div>
+
                 <div data-bind="if: !type">
                     <label for="result-text" data-bind="text: title"></label>
-                    <input class="result-text" type="text" data-bind="attr : { 'name' : 'wrap.results[' + \$index() + '].value' }" >
+                    <input id="result-text" class="result-text" type="text" data-bind="attr : { 'name' : 'wrap.results[' + \$index() + '].value' }" >
+                </div>
+                <div data-bind="if: type && type.toLowerCase() !== 'select'">
+                    <p class="margin-left left">
+                        <label for="result-text" data-bind="text: title"></label>
+                        <input class="result-text" data-bind="attr : { 'type' : type, 'name' : 'wrap.results[' + \$index() + '].value', value : defaultValue }" >
+                    </p>
                 </div>
             </div>
         </fieldset>

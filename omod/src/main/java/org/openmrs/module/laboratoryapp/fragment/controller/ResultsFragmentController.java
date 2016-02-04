@@ -38,7 +38,7 @@ public class ResultsFragmentController {
         }
     }
 
-    public List<SimpleObject> searchWorkList(
+    public List<SimpleObject> searchForResults(
             @RequestParam(value = "date", required = false) String dateStr,
             @RequestParam(value = "phrase", required = false) String phrase,
             @RequestParam(value = "investigation", required = false) Integer investigationId,
