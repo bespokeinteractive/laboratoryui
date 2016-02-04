@@ -99,7 +99,7 @@
 		</div>
 		<div data-bind="foreach: parameterOptions">
 			<input type="hidden" data-bind="attr: { 'name' : 'wrap.results[' + \$index() + '].conceptName' }, value: title" >
-			<div data-bind="if: type.toLowerCase() === 'select'">
+			<div data-bind="if:type && type.toLowerCase() === 'select'">
 				<p class="margin-left left">
 					<label for="result-option" class="input-position-class" data-bind="text: title"></label>
 					<select id="result-option" 
@@ -109,10 +109,18 @@
 					</select>
 				</p>
 			</div>
-			<div data-bind="if: type.toLowerCase() !== 'select'">
+
+
+			<div data-bind="if:type && type.toLowerCase() !== 'select'">
 				<p class="margin-left left">
 					<label for="result-text" data-bind="text: title"></label>
-					<input class="result-text" data-bind="attr : { 'type' : type, 'name' : 'wrap.results[' + \$index() + '].value', value : defaultValue }" >
+					<input id="result-text" class="result-text" data-bind="attr : { 'type' : type, 'name' : 'wrap.results[' + \$index() + '].value', value : defaultValue }" >
+				</p>
+			</div>
+			<div data-bind="if: !type">
+				<p class="margin-left left">
+					<label for="result-text" data-bind="text: title"></label>
+					<input class="result-text" type="text" data-bind="attr : {'name' : 'wrap.results[' + \$index() + '].value', value : defaultValue }" >
 				</p>
 			</div>
 		</div>
