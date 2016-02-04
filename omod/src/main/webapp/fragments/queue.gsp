@@ -19,8 +19,8 @@
 	<form>
 		<fieldset>
 			${ui.includeFragment("uicommons", "field/datetimepicker", [id: 'referred-date', label: 'Date Ordered', formFieldName: 'referredDate', useTime: false, defaultToday: true])}
-			<label for="phrase">Patient Identifier/Name</label>
-			<input id="phrase"/>
+			<label for="search-queue-for">Patient Identifier/Name</label>
+			<input id="search-queue-for"/>
 			<label for="investigation">Investigation</label>
 			<select name="investigation" id="investigation">
 				<option value="0">ALL</option>
@@ -99,12 +99,12 @@
 jq(function(){
 	jq("#get-tests").on("click", function(){
 		var date = jq("#referred-date-field").val();
-		var phrase = jq("#phrase").val();
+		var searchQueueFor = jq("#search-queue-for").val();
 		var investigation = jq("#investigation").val();
 		jq.getJSON('${ui.actionLink("laboratoryapp", "Queue", "searchQueue")}',
 			{ 
 				"date" : moment(date).format('DD/MM/YYYY'),
-				"phrase" : phrase,
+				"phrase" : searchQueueFor,
 				"investigation" : investigation,
 				"currentPage" : 1
 			}

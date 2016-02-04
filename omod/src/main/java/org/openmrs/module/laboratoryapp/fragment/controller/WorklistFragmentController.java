@@ -31,7 +31,7 @@ public class WorklistFragmentController {
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 		String dateStr = sdf.format(new Date());
 		model.addAttribute("currentDate", dateStr);
-		
+
 		LaboratoryService ls = (LaboratoryService) Context.getService(LaboratoryService.class);
 		Lab department = ls.getCurrentDepartment();
 		if(department!=null){
@@ -61,7 +61,7 @@ public class WorklistFragmentController {
 					allowableTests.addAll(testTreeMap.get(c));
 				}
 			}
-			List<LabTest> laboratoryTests = ls.getAcceptedLaboratoryTests(date, phrase, allowableTests);			
+			List<LabTest> laboratoryTests = ls.getAcceptedLaboratoryTests(date, phrase, allowableTests);
 			List<TestModel> tests = LaboratoryUtil.generateModelsFromTests(laboratoryTests, testTreeMap);
 			simpleObjects = SimpleObject.fromCollection(tests, ui, "startDate", "patientIdentifier", "patientName", "gender", "age", "test.name", "investigation", "testId", "orderId", "sampleId", "status", "value");
 		} catch (ParseException e) {
