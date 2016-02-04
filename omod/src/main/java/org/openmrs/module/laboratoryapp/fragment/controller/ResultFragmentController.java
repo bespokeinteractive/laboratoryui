@@ -83,9 +83,12 @@ public class ResultFragmentController {
 		Obs obs = getObs(encounter, concept);
 		obs.setConcept(concept);
 		obs.setOrder(test.getOrder());
-		if (concept.getDatatype().getName().equalsIgnoreCase("Text") || concept.getDatatype().getName().equalsIgnoreCase("Numeric")) {
+		if (concept.getDatatype().getName().equalsIgnoreCase("Text")) {
 			obs.setValueText(value);
-		} else if (concept.getDatatype().getName().equalsIgnoreCase("Coded")) {
+		}
+		else if( concept.getDatatype().getName().equalsIgnoreCase("Numeric")){
+			obs.setValueNumeric(Double.parseDouble(value));
+		}else if (concept.getDatatype().getName().equalsIgnoreCase("Coded")) {
 			Concept answerConcept = LaboratoryUtil.searchConcept(value);
 			obs.setValueCoded(answerConcept);
 		}
