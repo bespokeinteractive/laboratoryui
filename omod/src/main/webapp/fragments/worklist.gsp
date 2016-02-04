@@ -112,7 +112,13 @@
 			<div data-bind="if: type.toLowerCase() !== 'select'">
 				<p class="margin-left left">
 					<label for="result-text" data-bind="text: title"></label>
-					<input class="result-text" data-bind="attr : { 'type' : type, 'name' : 'wrap.results[' + \$index() + '].value', value : defaultValue }" >
+					<input id="result-text" class="result-text" data-bind="attr : { 'type' : type, 'name' : 'wrap.results[' + \$index() + '].value', value : defaultValue }" >
+				</p>
+			</div>
+			<div data-bind="if: !type">
+				<p class="margin-left left">
+					<label for="result-text" data-bind="text: title"></label>
+					<input class="result-text" type="text" data-bind="attr : {'name' : 'wrap.results[' + \$index() + '].value', value : defaultValue }" >
 				</p>
 			</div>
 		</div>
