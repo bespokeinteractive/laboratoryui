@@ -167,6 +167,7 @@ function acceptTest() {
 		},
 		'json'
 	);
+	acceptDialog.dialog( "close" );
 }
 
 jq(function(){
@@ -256,7 +257,7 @@ function accept(orderId) {
 			{ 'orderId' : orderId },
 			function (data) {
 				if (data) {
-					console.log(data.defaultSampleId);
+
 					defaultSampleId.val(data.defaultSampleId);
 					acceptDialog.dialog( "open" );
 
