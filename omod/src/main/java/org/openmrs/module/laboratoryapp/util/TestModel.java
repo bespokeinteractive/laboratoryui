@@ -29,6 +29,7 @@ public class TestModel implements Comparator<TestModel>, Comparable<TestModel> {
 
 	private String startDate;
 	private String patientIdentifier;
+	private Integer patientId;
 	private String patientName;
 	private String gender;
 	private Integer age;
@@ -55,6 +56,13 @@ public class TestModel implements Comparator<TestModel>, Comparable<TestModel> {
 
 	public void setStartDate(String startDate) {
 		this.startDate = startDate;
+	}
+	public Integer getPatientId() {
+		return patientId;
+	}
+
+	public void setPatientId(Integer patientId) {
+		this.patientId = patientId;
 	}
 
 	public String getPatientIdentifier() {
