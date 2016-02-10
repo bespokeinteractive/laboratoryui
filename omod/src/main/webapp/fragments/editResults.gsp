@@ -59,6 +59,7 @@
     <th>Age</th>
     <th>Test</th>
     <th>Results</th>
+    <th>Reports</th>
     </thead>
     <tbody data-bind="foreach: items">
     <td data-bind="text: sampleId"></td>
@@ -75,6 +76,9 @@
     <td data-bind="text: test.name"></td>
     <td>
         <a data-bind="attr: { href : 'javascript:showEditResultForm(' + testId + ')' }">Edit Result</a>
+    </td>
+    <td>
+        <a>Report</a>
     </td>
     </tbody>
 </table>
