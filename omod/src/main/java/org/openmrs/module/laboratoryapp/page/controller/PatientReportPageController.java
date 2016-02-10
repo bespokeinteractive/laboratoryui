@@ -13,6 +13,7 @@ import org.openmrs.ui.framework.fragment.FragmentConfiguration;
 import org.openmrs.ui.framework.fragment.FragmentModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.text.ParseException;
 import java.util.*;
@@ -22,12 +23,11 @@ import java.util.*;
  */
 public class PatientReportPageController {
     private static Logger logger = LoggerFactory.getLogger(PatientReportPageController.class);
-    public void controller(
+    public void get(
+            @RequestParam("patientId") Integer patientId,
             FragmentConfiguration config,
             FragmentModel model,
             UiUtils ui) {
-        config.require("patientId");
-        Integer patientId = Integer.valueOf(config.get("patientId").toString());
         Patient patient = Context.getPatientService().getPatient(patientId);
         model.addAttribute("patient", patient);
         LaboratoryService ls = Context.getService(LaboratoryService.class);
