@@ -31,12 +31,11 @@ public class PatientReportFragmentController {
 
 	private static Logger logger = LoggerFactory.getLogger(PatientReportFragmentController.class);
 
-	public void controller(
-			FragmentConfiguration config, 
+	public void get(
+			@RequestParam("patientId") Integer patientId,
+			FragmentConfiguration config,
 			FragmentModel model,
 			UiUtils ui) {
-		config.require("patientId");
-		Integer patientId = Integer.valueOf(config.get("patientId").toString());
 		Patient patient = Context.getPatientService().getPatient(patientId);
 		model.addAttribute("patient", patient);
 		LaboratoryService ls = Context.getService(LaboratoryService.class);
