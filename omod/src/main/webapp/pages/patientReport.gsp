@@ -1,11 +1,9 @@
-<form>
-    <p>
-        <label for="result-date">Result Date</label>
-        <input type="text" id="result-date" >
-    </p>
-    <button id="get-report">Get Report</button>
-</form>
-<div class="clear"></div>
+<%
+    ui.decorateWith("appui", "standardEmrPage")
+%>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.0/moment.js"></script>
+
 
 ${ui.includeFragment("coreapps", "patientHeader", [patient: patient])}
 
@@ -52,7 +50,7 @@ ${ui.includeFragment("coreapps", "patientHeader", [patient: patient])}
     var results = { 'items' : ko.observableArray([]) };
     var initialResults = [];
     <% currentResults.each { item -> %>
-    initialResults.push(${item});
+    initialResults.push(${item.toJson()});
     <% } %>
 
     jq(function(){
