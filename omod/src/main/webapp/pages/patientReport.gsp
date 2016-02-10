@@ -52,7 +52,7 @@ ${ui.includeFragment("coreapps", "patientHeader", [patient: patient])}
     var results = { 'items' : ko.observableArray([]) };
     var initialResults = [];
     <% currentResults.each { item -> %>
-    initialResults.push(${item.toJson()});
+    initialResults.push(${item});
     <% } %>
 
     jq(function(){

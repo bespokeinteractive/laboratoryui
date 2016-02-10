@@ -78,7 +78,7 @@
         <a data-bind="attr: { href : 'javascript:showEditResultForm(' + testId + ')' }">Edit Result</a>
     </td>
     <td>
-        <a>Report</a>
+        <a data-bind="attr: { href : 'javascript:loadPatientReport(' + patientId + ')' }">Report</a>
     </td>
     </tbody>
 </table>
@@ -183,6 +183,11 @@
                 }
             }
         });
+    }
+
+    function loadPatientReport(patientId){
+        queryparamenters = "?patientId=" + patientId;
+        window.location.replace('${ui.pageLink("laboratoryapp", "patientReport")}'+queryparamenters);
     }
 </script>
 

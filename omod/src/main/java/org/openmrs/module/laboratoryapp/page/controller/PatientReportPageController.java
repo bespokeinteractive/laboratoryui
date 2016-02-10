@@ -11,6 +11,7 @@ import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.fragment.FragmentConfiguration;
 import org.openmrs.ui.framework.fragment.FragmentModel;
+import org.openmrs.ui.framework.page.PageModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,8 +26,7 @@ public class PatientReportPageController {
     private static Logger logger = LoggerFactory.getLogger(PatientReportPageController.class);
     public void get(
             @RequestParam("patientId") Integer patientId,
-            FragmentConfiguration config,
-            FragmentModel model,
+            PageModel model,
             UiUtils ui) {
         Patient patient = Context.getPatientService().getPatient(patientId);
         model.addAttribute("patient", patient);
@@ -41,11 +41,13 @@ public class PatientReportPageController {
                     List<TestResultModel> trms = renderTests(tests, testTreeMap);
                     trms = formatTestResult(trms);
                     //model.addAttribute("tests", trms);
+
                     List<SimpleObject> results = SimpleObject.fromCollection(trms, ui,
                             "investigation", "set", "test", "value", "hiNormal",
                             "lowNormal", "lowAbsolute", "hiAbsolute", "hiCritical", "lowCritical",
                             "unit", "level", "concept", "encounterId", "testId");
                     model.addAttribute("currentResults", results);
+
                 }
             } catch (ParseException e) {
                 logger.error(e.getMessage());
