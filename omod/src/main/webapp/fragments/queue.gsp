@@ -64,18 +64,30 @@
 			<td data-bind="attr: { class : 'test-status-' + orderId }">
 				<span data-bind="if: status">Accepted</span>
 				<span data-bind="ifnot: status">
-					<a data-bind="attr: { href: 'javascript:acceptTest(' + orderId + ')' }">
+					<a data-bind="attr: { href: 'javascript:accept(' + orderId + ')' }">
 						Accept
 					</a>
 				</span>
 			</td>
 			<td data-bind="attr: { class : 'test-sample-id-' + orderId }, text: sampleId"></td>
+			<div id="accept-form" title="Accept">
+				<form>
+					<fieldset>
+						<label>Sample ID</label>
+						<input type="text" id="defaultSampleId">
+						<input type="hidden" id="order_ID">
+						<p data-bind="text:test.name"></p>
+					</fieldset>
+				</form>
+			</div>
 			<td>
 				<span data-bind="ifnot: status"> 
 					<a data-bind="attr: { href : 'javascript:reschedule(' + orderId + ')' }">Reschedule</a>
 				</span>
 			</td>
 		</tr>
+
+
 	</tbody>
 </table>
 
@@ -94,6 +106,7 @@
 		</fieldset>
 	</form>
 </div>
+
 
 <script>
 jq(function(){
@@ -122,15 +135,20 @@ jq(function(){
 </script>
 
 <script>
-var dialog, form;
+var dialog, form, acceptForm;
 var scheduleDate = jq("#reschedule-date");
 var orderId = jq("#order");
+var  defaultSampleId = jq("#defaultSampleId");
 var details = { 'patientName' : 'Patient Name', 'startDate' : 'Start Date', 'test' : { 'name' : 'Test Name' } }; 
 var testDetails = { details : ko.observable(details) }
 
-function acceptTest(orderId) {
+function acceptTest() {
+
+	console.log(orderId.val());
+	console.log(defaultSampleId.val());
+
 	jq.post('${ui.actionLink("laboratoryapp", "queue", "acceptLabTest")}',
-		{ 'orderId' : orderId },
+		{ 'orderId' : orderId.val(), 'confirmedSampleId': defaultSampleId.val()},
 		function (data) {
 			if (data.status === "success") {
 				console.log("Test accepted");
@@ -149,7 +167,33 @@ function acceptTest(orderId) {
 		},
 		'json'
 	);
+	acceptDialog.dialog( "close" );
 }
+
+jq(function(){
+	acceptDialog = jq("#accept-form").dialog({
+		autoOpen: false,
+		height: 250,
+		width: 400,
+		modal: true,
+		buttons: {
+			Accept: acceptTest,
+			Cancel: function() {
+				acceptDialog.dialog( "close" );
+			}
+		},
+		close: function() {
+			acceptForm[ 0 ].reset();
+		}
+	});
+
+	acceptForm = acceptDialog.find( "form" ).on( "submit", function( event ) {
+		event.preventDefault();
+		acceptTest(orderId.val());
+	});
+
+	ko.applyBindings(testDetails, jq("#reschedule-form")[0]);
+});
 
 jq(function(){	
 	dialog = jq("#reschedule-form").dialog({
@@ -204,6 +248,25 @@ function reschedule(orderId) {
 	});
 	testDetails.details(details);
 	dialog.dialog( "open" );
+}
+
+function accept(orderId) {
+	jq("#reschedule-form #order").val(orderId);
+
+	jq.post('${ui.actionLink("laboratoryapp", "queue", "fetchSampleID")}',
+			{ 'orderId' : orderId },
+			function (data) {
+				if (data) {
+
+					defaultSampleId.val(data.defaultSampleId);
+					acceptDialog.dialog( "open" );
+
+				} else{
+					jq().toastmessage('showErrorToast', data.error);
+				}
+			},
+			'json'
+	);
 }
 
 </script>

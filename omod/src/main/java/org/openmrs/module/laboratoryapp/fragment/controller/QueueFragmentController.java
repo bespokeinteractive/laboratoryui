@@ -79,12 +79,12 @@ public class QueueFragmentController {
 	}
 
 	public SimpleObject acceptLabTest(
-			@RequestParam("orderId") Integer orderId) {
+			@RequestParam("orderId") Integer orderId,
+			@RequestParam("confirmedSampleId") String sampleId) {
 		Order order = Context.getOrderService().getOrder(orderId);
 		if (order != null) {
 			try {
 				LaboratoryService ls = (LaboratoryService) Context.getService(LaboratoryService.class);
-				String sampleId = getSampleId(orderId);
 				Integer acceptedTestId = ls.acceptTest(order, sampleId);
 				if (acceptedTestId > 0) {
 					return SimpleObject.create("acceptedTestId", acceptedTestId, "sampleId", sampleId, "status", "success");
@@ -105,6 +105,13 @@ public class QueueFragmentController {
 			}
 		}
 		return SimpleObject.create("status", "fail", "error", "Order {" + orderId + "} not found.");
+	}
+
+	public SimpleObject fetchSampleID(@RequestParam("orderId") Integer orderId)
+	{
+		String defaultSampleId = this.getSampleId(orderId);
+
+		return SimpleObject.create("defaultSampleId",defaultSampleId);
 	}
 	
 	private String getSampleId(Integer orderId){
