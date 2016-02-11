@@ -1,16 +1,18 @@
 <% ui.includeJavascript("laboratoryapp", "jQuery.print.js") %>
 
 <script>
+    var editResultsDate;
     jq(function(){
         jq('#date').datepicker("option", "dateFormat", "dd/mm/yy");
 
         jq('#get-results').on('click', function () {
-            var date = moment(jq('#accepted-date-field').val()).format('DD/MM/YYYY');
+             editResultsDate = moment(jq('#accepted-date-edit-field').val()).format('DD/MM/YYYY');
             var searchResultsFor = jq("#search-results-for").val();
             var investigation = jq("#investigation").val();
-            jq.getJSON('${ui.actionLink("laboratoryapp", "results", "searchForResults")}',
+
+            jq.getJSON('${ui.actionLink("laboratoryapp", "editResults", "searchForResults")}',
                     {
-                        "date" : date,
+                        "date" : editResultsDate,
                         "phrase" : searchResultsFor,
                         "investigation" : investigation
                     }
@@ -30,7 +32,7 @@
 <div>
     <form>
         <fieldset>
-            ${ui.includeFragment("uicommons", "field/datetimepicker", [id: 'accepted-date', label: 'Date', formFieldName: 'acceptedDate', useTime: false, defaultToday: true])}
+            ${ui.includeFragment("uicommons", "field/datetimepicker", [id: 'accepted-date-edit', label: 'Date', formFieldName: 'acceptedDate', useTime: false, defaultToday: true])}
             <label for="search-results-for">Patient Identifier/Name</label>
             <input id="search-results-for"/>
             <label for="investigation">Investigation</label>
@@ -56,6 +58,7 @@
     <th>Age</th>
     <th>Test</th>
     <th>Results</th>
+    <th>Reports</th>
     </thead>
     <tbody data-bind="foreach: items">
     <td data-bind="text: sampleId"></td>
@@ -72,6 +75,9 @@
     <td data-bind="text: test.name"></td>
     <td>
         <a data-bind="attr: { href : 'javascript:showEditResultForm(' + testId + ')' }">Edit Result</a>
+    </td>
+    <td>
+        <a data-bind="attr: { href : 'javascript:loadPatientReport(' + patientId + ')' }">Report</a>
     </td>
     </tbody>
 </table>
@@ -176,6 +182,12 @@
                 }
             }
         });
+    }
+
+    function loadPatientReport(patientId){
+        console.log(editResultsDate);
+        queryparamenters = "?patientId=" + patientId + '&selectedDate=' + editResultsDate;
+        window.location.replace('${ui.pageLink("laboratoryapp", "patientReport")}'+queryparamenters);
     }
 </script>
 

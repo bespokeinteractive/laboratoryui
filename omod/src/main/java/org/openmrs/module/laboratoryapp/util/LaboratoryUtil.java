@@ -135,6 +135,7 @@ public class LaboratoryUtil {
 				SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 				TestModel tm = new TestModel();
 				tm.setStartDate(sdf.format(order.getStartDate()));
+				tm.setPatientId(order.getPatient().getPatientId());
 				tm.setPatientIdentifier(order.getPatient()
 						.getPatientIdentifier().getIdentifier());
 				tm.setPatientName(PatientUtils.getFullName(order.getPatient()));
@@ -195,6 +196,7 @@ public class LaboratoryUtil {
 					TestModel tm1 = new TestModel();
 					TestModel tm2 = new TestModel();
 					tm2 = generateModel(test.getOrder(), test, testTreeMap);
+					tm1.setPatientId(tm2.getPatientId());
 					tm1.setPatientIdentifier(tm2.getPatientIdentifier());
 					tm1.setPatientName(tm2.getPatientName());
 					tm1.setGender(tm2.getGender());
@@ -210,6 +212,7 @@ public class LaboratoryUtil {
 				TestModel tm1 = new TestModel();
 				TestModel tm2 = new TestModel();
 				tm2 = generateModel(test.getOrder(), test, testTreeMap);
+				tm1.setPatientId(tm2.getPatientId());
 				tm1.setPatientIdentifier(tm2.getPatientIdentifier());
 				tm1.setPatientName(tm2.getPatientName());
 				tm1.setGender(tm2.getGender());
@@ -313,6 +316,7 @@ public class LaboratoryUtil {
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 		TestModel tm = new TestModel();
 		tm.setStartDate(sdf.format(order.getStartDate()));
+		tm.setPatientId(order.getPatient().getPatientId());
 		tm.setPatientIdentifier(order.getPatient().getPatientIdentifier()
 				.getIdentifier());
 		tm.setPatientName(PatientUtils.getFullName(order.getPatient()));
