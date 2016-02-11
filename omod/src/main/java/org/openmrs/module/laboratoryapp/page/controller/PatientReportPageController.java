@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -26,16 +27,27 @@ public class PatientReportPageController {
     private static Logger logger = LoggerFactory.getLogger(PatientReportPageController.class);
     public void get(
             @RequestParam("patientId") Integer patientId,
+            @RequestParam(value = "selectedDate", required = false) String dateStr,
             PageModel model,
             UiUtils ui) {
         Patient patient = Context.getPatientService().getPatient(patientId);
         model.addAttribute("patient", patient);
         LaboratoryService ls = Context.getService(LaboratoryService.class);
+
+        Date selectedDate = new Date();
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        try {
+            selectedDate = dateFormat.parse(dateStr);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
         if (patient != null) {
 
             List<LabTest> tests;
             try {
-                tests = ls.getLaboratoryTestsByDateAndPatient(new Date(), patient);
+                tests = ls.getLaboratoryTestsByDateAndPatient(selectedDate, patient);
                 if ((tests != null) && (!tests.isEmpty())) {
                     Map<Concept, Set<Concept>> testTreeMap = LaboratoryTestUtil.getAllowableTests();
                     List<TestResultModel> trms = renderTests(tests, testTreeMap);
@@ -46,7 +58,8 @@ public class PatientReportPageController {
                             "investigation", "set", "test", "value", "hiNormal",
                             "lowNormal", "lowAbsolute", "hiAbsolute", "hiCritical", "lowCritical",
                             "unit", "level", "concept", "encounterId", "testId");
-                    model.addAttribute("currentResults", results);
+                    SimpleObject currentResults = SimpleObject.create("data", results);
+                    model.addAttribute("currentResults", currentResults);
 
                 }
             } catch (ParseException e) {

@@ -1,15 +1,14 @@
 <% ui.includeJavascript("laboratoryapp", "jQuery.print.js") %>
 
 <script>
+    var editResultsDate;
     jq(function(){
         jq('#date').datepicker("option", "dateFormat", "dd/mm/yy");
 
         jq('#get-results').on('click', function () {
-            var editResultsDate = moment(jq('#accepted-date-edit-field').val()).format('DD/MM/YYYY');
+             editResultsDate = moment(jq('#accepted-date-edit-field').val()).format('DD/MM/YYYY');
             var searchResultsFor = jq("#search-results-for").val();
             var investigation = jq("#investigation").val();
-
-            console.log("Date: " + editResultsDate + " Search Results For " + searchResultsFor + " Investigation " + investigation)
 
             jq.getJSON('${ui.actionLink("laboratoryapp", "editResults", "searchForResults")}',
                     {
@@ -186,7 +185,8 @@
     }
 
     function loadPatientReport(patientId){
-        queryparamenters = "?patientId=" + patientId;
+        console.log(editResultsDate);
+        queryparamenters = "?patientId=" + patientId + '&selectedDate=' + editResultsDate;
         window.location.replace('${ui.pageLink("laboratoryapp", "patientReport")}'+queryparamenters);
     }
 </script>
