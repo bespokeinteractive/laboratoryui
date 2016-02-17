@@ -5,15 +5,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import org.openmrs.Concept;
-import org.openmrs.Encounter;
-import org.openmrs.EncounterType;
-import org.openmrs.Location;
-import org.openmrs.Obs;
-import org.openmrs.Order;
+import org.openmrs.*;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.hospitalcore.BillingConstants;
+import org.openmrs.module.hospitalcore.PatientQueueService;
+import org.openmrs.module.hospitalcore.matcher.RegistrationUtils;
 import org.openmrs.module.hospitalcore.model.LabTest;
+import org.openmrs.module.hospitalcore.model.OpdPatientQueue;
+import org.openmrs.module.hospitalcore.model.OpdPatientQueueLog;
 import org.openmrs.module.hospitalcore.util.GlobalPropertyUtil;
 import org.openmrs.module.laboratory.LaboratoryService;
 import org.openmrs.module.laboratoryapp.util.LaboratoryUtil;
@@ -73,7 +72,48 @@ public class ResultFragmentController {
 		test.setEncounter(encounter);
 		test = ls.saveLaboratoryTest(test);
 		ls.completeTest(test);
-		
+
+
+		//send patient back to the OPD Queue
+		Patient patient = encounter.getPatient();
+		PatientQueueService queueService = Context.getService(PatientQueueService.class);
+		Encounter queueEncounter = queueService.getLastOPDEncounter(encounter.getPatient());
+		OpdPatientQueueLog patientQueueLog =queueService.getOpdPatientQueueLogByEncounter(queueEncounter);
+		Concept selectedOPDConcept = patientQueueLog.getOpdConcept();
+		String selectedCategory = patientQueueLog.getCategory();
+		String visitStatus = patientQueueLog.getVisitStatus();
+
+		OpdPatientQueue queue = queueService.getOpdPatientQueue(
+				patient.getPatientIdentifier().getIdentifier(), selectedOPDConcept.getConceptId());
+
+		if (queue == null) {
+			queue = new OpdPatientQueue();
+			queue.setUser(Context.getAuthenticatedUser());
+			queue.setPatient(patient);
+			queue.setCreatedOn(new Date());
+			queue.setBirthDate(patient.getBirthdate());
+			queue.setPatientIdentifier(patient.getPatientIdentifier().getIdentifier());
+			queue.setOpdConcept(selectedOPDConcept);
+			queue.setOpdConceptName(selectedOPDConcept.getName().getName());
+			if(null!=patient.getMiddleName())
+			{
+				queue.setPatientName( patient.getGivenName() + " " + patient.getFamilyName() + " " + patient.getMiddleName());
+			}
+			else
+			{
+				queue.setPatientName( patient.getGivenName() + " " + patient.getFamilyName());
+			}
+			//queue.setReferralConcept(referralConcept);
+			//queue.setReferralConceptName(referralConcept.getName().getName());
+			queue.setSex(patient.getGender());
+			queue.setCategory(selectedCategory);
+			queue.setVisitStatus(visitStatus);
+			queueService.saveOpdPatientQueue(queue);
+
+		}
+
+
+
 		return SimpleObject.create("status", "success", "message", "Saved!");
 	}
 	
