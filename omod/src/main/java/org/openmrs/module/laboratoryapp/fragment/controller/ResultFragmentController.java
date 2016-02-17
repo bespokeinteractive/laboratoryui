@@ -73,7 +73,13 @@ public class ResultFragmentController {
 		test = ls.saveLaboratoryTest(test);
 		ls.completeTest(test);
 
+		this.sendPatientToQueue(encounter);
 
+		return SimpleObject.create("status", "success", "message", "Saved!");
+	}
+
+	private void sendPatientToQueue(Encounter encounter)
+	{
 		//send patient back to the OPD Queue
 		Patient patient = encounter.getPatient();
 		PatientQueueService queueService = Context.getService(PatientQueueService.class);
@@ -112,10 +118,6 @@ public class ResultFragmentController {
 			queueService.saveOpdPatientQueue(queue);
 
 		}
-
-
-
-		return SimpleObject.create("status", "success", "message", "Saved!");
 	}
 	
 	private Obs insertValue(Encounter encounter, Concept concept, String value,
