@@ -5,15 +5,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import org.openmrs.Concept;
-import org.openmrs.Encounter;
-import org.openmrs.EncounterType;
-import org.openmrs.Location;
-import org.openmrs.Obs;
-import org.openmrs.Order;
+import org.openmrs.*;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.hospitalcore.BillingConstants;
+import org.openmrs.module.hospitalcore.PatientQueueService;
+import org.openmrs.module.hospitalcore.matcher.RegistrationUtils;
 import org.openmrs.module.hospitalcore.model.LabTest;
+import org.openmrs.module.hospitalcore.model.OpdPatientQueue;
+import org.openmrs.module.hospitalcore.model.OpdPatientQueueLog;
 import org.openmrs.module.hospitalcore.util.GlobalPropertyUtil;
 import org.openmrs.module.laboratory.LaboratoryService;
 import org.openmrs.module.laboratoryapp.util.LaboratoryUtil;
@@ -26,6 +25,8 @@ import org.openmrs.ui.framework.annotation.BindParams;
 import org.springframework.web.bind.annotation.RequestParam;
 
 public class ResultFragmentController {
+		private static final Integer LAB_CONCEPT_ID = 2548;
+
 	public List<SimpleObject> getResultTemplate(@RequestParam("testId") Integer testId, UiUtils ui) {
 		LaboratoryService ls = Context.getService(LaboratoryService.class);
 		LabTest test = ls.getLaboratoryTest(testId);		
@@ -45,7 +46,7 @@ public class ResultFragmentController {
 		Encounter encounter = new Encounter();
 		encounter.setCreator(Context.getAuthenticatedUser());
 		encounter.setDateCreated(new Date());
-		
+
 		//TODO: Use location from session
 		Location loc = Context.getLocationService().getLocation(1);
 		encounter.setLocation(loc);
@@ -73,8 +74,55 @@ public class ResultFragmentController {
 		test.setEncounter(encounter);
 		test = ls.saveLaboratoryTest(test);
 		ls.completeTest(test);
-		
+
+		this.sendPatientToOpdQueue(encounter);
+
 		return SimpleObject.create("status", "success", "message", "Saved!");
+	}
+
+	private void sendPatientToOpdQueue(Encounter encounter)
+	{
+		Patient patient = encounter.getPatient();
+		PatientQueueService queueService = Context.getService(PatientQueueService.class);
+		Concept referralConcept = Context.getConceptService().getConcept(LAB_CONCEPT_ID);
+		Encounter queueEncounter = queueService.getLastOPDEncounter(encounter.getPatient());
+		OpdPatientQueueLog patientQueueLog =queueService.getOpdPatientQueueLogByEncounter(queueEncounter);
+		Concept selectedOPDConcept = patientQueueLog.getOpdConcept();
+		String selectedCategory = patientQueueLog.getCategory();
+		String visitStatus = patientQueueLog.getVisitStatus();
+
+		OpdPatientQueue patientInQueue = queueService.getOpdPatientQueue(
+				patient.getPatientIdentifier().getIdentifier(), selectedOPDConcept.getConceptId());
+
+		if (patientInQueue == null) {
+			patientInQueue = new OpdPatientQueue();
+			patientInQueue.setUser(Context.getAuthenticatedUser());
+			patientInQueue.setPatient(patient);
+			patientInQueue.setCreatedOn(new Date());
+			patientInQueue.setBirthDate(patient.getBirthdate());
+			patientInQueue.setPatientIdentifier(patient.getPatientIdentifier().getIdentifier());
+			patientInQueue.setOpdConcept(selectedOPDConcept);
+			patientInQueue.setOpdConceptName(selectedOPDConcept.getName().getName());
+			if(null!=patient.getMiddleName())
+			{
+				patientInQueue.setPatientName(patient.getGivenName() + " " + patient.getFamilyName() + " " + patient.getMiddleName());
+			}
+			else
+			{
+				patientInQueue.setPatientName(patient.getGivenName() + " " + patient.getFamilyName());
+			}
+
+			patientInQueue.setReferralConcept(referralConcept);
+			patientInQueue.setSex(patient.getGender());
+			patientInQueue.setCategory(selectedCategory);
+			patientInQueue.setVisitStatus(visitStatus);
+			queueService.saveOpdPatientQueue(patientInQueue);
+
+		}
+		else{
+			patientInQueue.setReferralConcept(referralConcept);
+			queueService.saveOpdPatientQueue(patientInQueue);
+		}
 	}
 	
 	private Obs insertValue(Encounter encounter, Concept concept, String value,
