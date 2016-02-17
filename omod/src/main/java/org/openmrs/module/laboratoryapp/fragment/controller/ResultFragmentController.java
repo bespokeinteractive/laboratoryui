@@ -44,7 +44,7 @@ public class ResultFragmentController {
 		Encounter encounter = new Encounter();
 		encounter.setCreator(Context.getAuthenticatedUser());
 		encounter.setDateCreated(new Date());
-		
+
 		//TODO: Use location from session
 		Location loc = Context.getLocationService().getLocation(1);
 		encounter.setLocation(loc);
@@ -77,6 +77,7 @@ public class ResultFragmentController {
 		//send patient back to the OPD Queue
 		Patient patient = encounter.getPatient();
 		PatientQueueService queueService = Context.getService(PatientQueueService.class);
+		Concept referralConcept = Context.getConceptService().getConcept(2548);
 		Encounter queueEncounter = queueService.getLastOPDEncounter(encounter.getPatient());
 		OpdPatientQueueLog patientQueueLog =queueService.getOpdPatientQueueLogByEncounter(queueEncounter);
 		Concept selectedOPDConcept = patientQueueLog.getOpdConcept();
@@ -103,8 +104,8 @@ public class ResultFragmentController {
 			{
 				queue.setPatientName( patient.getGivenName() + " " + patient.getFamilyName());
 			}
-			//queue.setReferralConcept(referralConcept);
-			//queue.setReferralConceptName(referralConcept.getName().getName());
+
+			queue.setReferralConcept(referralConcept);
 			queue.setSex(patient.getGender());
 			queue.setCategory(selectedCategory);
 			queue.setVisitStatus(visitStatus);
