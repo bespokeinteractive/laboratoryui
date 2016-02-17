@@ -119,6 +119,10 @@ public class ResultFragmentController {
 			queueService.saveOpdPatientQueue(patientInQueue);
 
 		}
+		else{
+			patientInQueue.setReferralConcept(referralConcept);
+			queueService.saveOpdPatientQueue(patientInQueue);
+		}
 	}
 	
 	private Obs insertValue(Encounter encounter, Concept concept, String value,
