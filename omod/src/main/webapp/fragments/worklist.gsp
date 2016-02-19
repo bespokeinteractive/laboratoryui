@@ -1,5 +1,3 @@
-<% ui.includeJavascript("laboratoryapp", "jQuery.print.js") %>
-
 <script>
 	jq(function(){		
 		jq('#get-worklist').on('click', function () {
@@ -28,30 +26,68 @@
 <div>
 	<form>
 		<fieldset>
-			${ui.includeFragment("uicommons", "field/datetimepicker", [id: 'accepted-date', label: 'Date Accepted', formFieldName: 'acceptedDate', useTime: false, defaultToday: true])}
-			<label for="search-worklist-for">Patient Identifier/Name</label>
-			<input id="search-worklist-for"/>
-			<label for="investigation">Investigation</label>
-			<select name="investigation" id="investigation">
-				<option>Select an investigation</option>
-				<% investigations.each { investigation -> %>
-					<option value="${investigation.id}">${investigation.name.name}</option>
-				<% } %>	
-			</select>
+			<div class="onerow">
+				<div class="col4">
+					<label for="accepted-date-display"> Date Accepted </label>
+				</div>
+				
+				<div class="col4">
+					<label for="search-worklist-for">Patient Identifier/Name</label>
+				</div>
+				
+				<div class="col4 last">
+					<label for="investigation">Investigation</label>
+				</div>
+			</div>
+			
+			<div class="onerow">
+				<div class="col4">
+					${ui.includeFragment("uicommons", "field/datetimepicker", [id: 'accepted-date', label: 'Date Accepted', formFieldName: 'acceptedDate', useTime: false, defaultToday: true])}
+				</div>
+				
+				<div class="col4">
+					<input id="search-worklist-for"/>
+				</div>
+				
+				<div class="col4 last">
+					<select name="investigation" id="investigation">
+						<option>Select an investigation</option>
+						<% investigations.each { investigation -> %>
+							<option value="${investigation.id}">${investigation.name.name}</option>
+						<% } %>	
+					</select>
+				</div>
+			</div>
+			
+			<div class="onerow">
+				<div class="col4">
+					<label for="include-result">
+						<input type="checkbox" id="include-result" >
+						Include result
+					</label>
+				</div>
+				
+				<div class="col5 last" style="padding-top: 5px">
+					<button id="print-worklist">Print Worklist</button>
+					<button id="export-worklist">Export Worklist</button>
+				</div>
+				
+
+			
+			</div>
+			
 			<br/>
-			<input type="button" value="Get patients" id="get-worklist"/>
+			<br/>
 		</fieldset>
 	</form>
 </div>
 
 <div>
-	<label for="include-result">Include result</label>
-	<input type="checkbox" id="include-result" >
-	<button id="print-worklist">Print Worklist</button>
-	<button id="export-worklist">Export Worklist</button>
+	
+	
 </div>
 
-<table id="worklist">
+<table id="test-worklist">
 	<thead>
 		<tr>
 			<th>Sample ID</th>	
@@ -285,7 +321,7 @@ function saveSchedule() {
 	var workList = new WorkList();
 	
 	jq(function(){
-		ko.applyBindings(workList, jq("#worklist")[0]);
+		ko.applyBindings(workList, jq("#test-worklist")[0]);
 	});
 </script>
 

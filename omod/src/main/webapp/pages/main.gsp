@@ -1,9 +1,11 @@
 <% 
 	ui.decorateWith("appui", "standardEmrPage", [title: "Laboratory Dashboard"])
 	ui.includeCss("registration", "onepcssgrid.css")
+	
+	ui.includeJavascript("uicommons", "moment.js")
+	ui.includeJavascript("laboratoryapp", "jQuery.print.js")
 %>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.0/moment.js"></script>
 <script>
 	jq(function(){
 		jq(".lab-tabs").tabs();
@@ -11,6 +13,12 @@
 		jq("#refresh").on("click", function(){
 			if (jq('#queue').is(':visible')){
 				getQueuePatients();
+			}
+			else if(jq('#worklist').is(':visible')){
+				getWorklists();
+			}
+			else if(jq('#results').is(':visible')){
+				alert('Here3');
 			}
 		});
 		
@@ -36,6 +44,27 @@
 			});
 		}
 		
+		function getWorklists() {
+			var date = moment(jq('#accepted-date-field').val()).format('DD/MM/YYYY');
+			var searchWorklistFor = jq("#search-worklist-for").val();
+			var investigation = jq("#investigation").val();
+			jq.getJSON('${ui.actionLink("laboratoryapp", "worklist", "searchWorkList")}',
+				{ 
+					"date" : date,
+					"phrase" : searchWorklistFor,
+					"investigation" : investigation
+				}
+			).success(function(data) {
+				if (data.length === 0) {
+					jq().toastmessage('showNoticeToast', "No match found!");
+				}
+				workList.items.removeAll();
+				jq.each(data, function(index, testInfo){
+					workList.items.push(testInfo);
+				});
+			});
+		}
+		
 		jq('#referred-date').on("change", function (dateText) {
 			getQueuePatients();
         });
@@ -52,10 +81,6 @@
 				}
 			}
 		}); 
-		
-		
-		
-		
 	});
 	
 	
@@ -77,10 +102,11 @@
 		padding: 10px;
 		width: 97.4%;
 	}
-	#referred-date label{
+	#referred-date label,
+	#accepted-date label{
 		display: none;
 	}
-	form input{
+	form input[type="text"]{
 		width: 92%;
 	}
 	form select{
@@ -102,7 +128,7 @@
 		background: #333 none repeat scroll 0 0;
 	}
 	
-	#test-queue, #worklist, #results {
+	#queue table, #worklist table, #results table{
 		margin-top: 10px;
 	}
 	#refresh{
@@ -119,6 +145,14 @@
 	}
 	form label, .form label {
 		color: #028b7d;
+	}
+	.col5 {
+		width: 65%;
+	}
+	.col5 button{
+		float: right;
+		margin-left: 10px;
+		min-width: 300px;
 	}
 </style>
 <header>

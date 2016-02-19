@@ -150,8 +150,6 @@
 
 <div>
 	<form>
-		
-		
 		<fieldset>
 			<div class="onerow">
 				<div class="col4">

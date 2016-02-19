@@ -48,7 +48,7 @@
     </form>
 </div>
 
-<table id="results">
+<table id="test-results">
     <thead>
     <th>Sample ID</th>
     <th>Date</th>
@@ -199,6 +199,6 @@
     var result = new Result();
 
     jq(function(){
-        ko.applyBindings(result, jq("#results")[0]);
+        ko.applyBindings(result, jq("#test-results")[0]);
     });
 </script>
