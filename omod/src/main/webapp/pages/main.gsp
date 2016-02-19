@@ -7,7 +7,58 @@
 <script>
 	jq(function(){
 		jq(".lab-tabs").tabs();
+		
+		jq("#refresh").on("click", function(){
+			if (jq('#queue').is(':visible')){
+				getQueuePatients();
+			}
+		});
+		
+		function getQueuePatients() {
+			var date = jq("#referred-date-field").val();
+			var searchQueueFor = jq("#search-queue-for").val();
+			var investigation = jq("#investigation").val();
+			jq.getJSON('${ui.actionLink("laboratoryapp", "Queue", "searchQueue")}',
+				{ 
+					"date" : moment(date).format('DD/MM/YYYY'),
+					"phrase" : searchQueueFor,
+					"investigation" : investigation,
+					"currentPage" : 1
+				}
+			).success(function(data) {
+				if (data.length === 0) {
+					jq().toastmessage('showNoticeToast', "No match found!");
+				}
+				queueData.tests.removeAll();
+				jq.each(data, function(index, testInfo){
+					queueData.tests.push(testInfo);
+				});
+			});
+		}
+		
+		jq('#referred-date').on("change", function (dateText) {
+			getQueuePatients();
+        });
+		
+		jq('#investigation').bind('change keyup', function() {
+			getQueuePatients();
+		});
+		
+		jq('input').keydown(function (e) {
+			var key = e.keyCode || e.which;
+			if (key == 9 || key == 13) {
+				if (jq(this).attr('id') == 'search-queue-for'){
+					getQueuePatients();
+				}
+			}
+		}); 
+		
+		
+		
+		
 	});
+	
+	
 </script>
 <style>
 	.new-patient-header .identifiers {
@@ -35,7 +86,12 @@
 	form select{
 		width: 100%;
 	}
+	form input:focus, form select:focus{
+		outline: 2px none #007fff;
+		border: 1px solid #777;
+	}
 	.add-on {
+		color: #f26522;
 		float: right;
 		left: auto;
 		margin-left: -31px;
@@ -48,6 +104,21 @@
 	
 	#test-queue, #worklist, #results {
 		margin-top: 10px;
+	}
+	#refresh{
+		background: #88af28 -moz-linear-gradient(center top , #a1d030, #88af28) repeat scroll 0 0;
+		border-top: 1px solid #88af28;
+		border-left: 1px solid #88af28;
+		border-right: 1px solid #88af28;
+		border-radius: 3px 3px 0px 0px;
+		color: #fff !important;
+		float: right;
+	}
+	#refresh a i{
+		font-size: 12px;
+	}
+	form label, .form label {
+		color: #028b7d;
 	}
 </style>
 <header>
@@ -91,7 +162,14 @@
 					<li><a href="#results">Results</a></li>
 					<li><a href="#reports">Reports</a></li>
 					<li><a href="#status">Functional Status</a></li>
-					<li><a href="#tests">Confidential Test Orders</a></li>
+					<li><a href="#tests">Test Orders</a></li>
+					
+					<li id="refresh" class="ui-state-default">
+						<a style="color:#fff">
+							<i class="icon-refresh"></i>
+							Get Patients
+						</a>
+					</li>
 				</ul>
 				
 				<div id="queue">

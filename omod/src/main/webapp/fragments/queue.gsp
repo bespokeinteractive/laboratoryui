@@ -1,12 +1,145 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.0/moment.js"></script>
 
 <script>
+	var queueData = new QueueData();
+	var dialog, form, acceptForm;
+	var scheduleDate = jq("#reschedule-date");
+	var orderId = jq("#order");
+	var  defaultSampleId = jq("#defaultSampleId");
+	var details = { 'patientName' : 'Patient Name', 'startDate' : 'Start Date', 'test' : { 'name' : 'Test Name' } }; 
+	var testDetails = { details : ko.observable(details) }
+
+	function acceptTest() {
+
+		console.log(orderId.val());
+		console.log(defaultSampleId.val());
+
+		jq.post('${ui.actionLink("laboratoryapp", "queue", "acceptLabTest")}',
+			{ 'orderId' : orderId.val(), 'confirmedSampleId': defaultSampleId.val()},
+			function (data) {
+				if (data.status === "success") {
+					console.log("Test accepted");
+					var acceptedTest = ko.utils.arrayFirst(queueData.tests(), function(item) {
+						return item.orderId == orderId;
+					});
+					console.log("Accepted test (before update): " + acceptedTest);
+					queueData.tests.remove(acceptedTest);
+					acceptedTest.status = "accepted";
+					acceptedTest.sampleId = data.sampleId;				
+					console.log("Accepted test (after before update): " + acceptedTest);
+					queueData.tests.push(acceptedTest);
+				} else if (data.status === "fail") {
+					jq().toastmessage('showErrorToast', data.error);
+				}
+			},
+			'json'
+		);
+		acceptDialog.dialog( "close" );
+	}
+
+	jq(function(){
+		acceptDialog = jq("#accept-form").dialog({
+			autoOpen: false,
+			height: 250,
+			width: 400,
+			modal: true,
+			buttons: {
+				Accept: acceptTest,
+				Cancel: function() {
+					acceptDialog.dialog( "close" );
+				}
+			},
+			close: function() {
+				acceptForm[ 0 ].reset();
+			}
+		});
+
+		acceptForm = acceptDialog.find( "form" ).on( "submit", function( event ) {
+			event.preventDefault();
+			acceptTest(orderId.val());
+		});
+
+		ko.applyBindings(testDetails, jq("#reschedule-form")[0]);
+	});
+
+	jq(function(){	
+		dialog = jq("#reschedule-form").dialog({
+			autoOpen: false,
+			height: 350,
+			width: 400,
+			modal: true,
+			buttons: {
+				Reschedule: saveSchedule,
+				Cancel: function() {
+					dialog.dialog( "close" );
+				}
+			},
+			close: function() {
+				form[ 0 ].reset();
+				allFields.removeClass( "ui-state-error" );
+			}
+		});
+		
+		form = dialog.find( "form" ).on( "submit", function( event ) {
+			event.preventDefault();
+			saveSchedule();
+		});
+
+		ko.applyBindings(testDetails, jq("#reschedule-form")[0]);
+
+	});
+
+	function saveSchedule() {
+		jq.post('${ui.actionLink("laboratoryapp", "queue", "rescheduleTest")}',
+			{ "orderId" : orderId.val(), "rescheduledDate" : moment(scheduleDate.val()).format('DD/MM/YYYY') },
+			function (data) {
+				if (data.status === "fail") {
+					jq().toastmessage('showErrorToast', data.error);
+				} else {				
+					jq().toastmessage('showSuccessToast', data.message);
+					var rescheduledTest = ko.utils.arrayFirst(queueData.tests(), function(item) {
+						return item.orderId == orderId.val();
+					});
+					queueData.tests.remove(rescheduledTest);
+					dialog.dialog("close");
+				}
+			},
+			'json'
+		);
+	}
+
+	function reschedule(orderId) {
+		jq("#reschedule-form #order").val(orderId);
+		var details = ko.utils.arrayFirst(queueData.tests(), function(item) {
+			return item.orderId == orderId;
+		});
+		testDetails.details(details);
+		dialog.dialog( "open" );
+	}
+
+	function accept(orderId) {
+		jq("#reschedule-form #order").val(orderId);
+
+		jq.post('${ui.actionLink("laboratoryapp", "queue", "fetchSampleID")}',
+				{ 'orderId' : orderId },
+				function (data) {
+					if (data) {
+
+						defaultSampleId.val(data.defaultSampleId);
+						acceptDialog.dialog( "open" );
+
+					} else{
+						jq().toastmessage('showErrorToast', data.error);
+					}
+				},
+				'json'
+		);
+	}
 	function QueueData() {
 		self = this;
 		self.tests = ko.observableArray([]);
 	}
 
-	var queueData = new QueueData();
 
 	jq(function(){		
 		ko.applyBindings(queueData, jq("#test-queue")[0]);
@@ -55,7 +188,6 @@
 		
 			<br/>
 			<br/>
-			<input type="button" value="Get patients" id="get-tests"/>
 		</fieldset>
 	</form>
 </div>
@@ -132,167 +264,3 @@
 		</fieldset>
 	</form>
 </div>
-
-
-<script>
-jq(function(){
-	jq("#get-tests").on("click", function(){
-		var date = jq("#referred-date-field").val();
-		var searchQueueFor = jq("#search-queue-for").val();
-		var investigation = jq("#investigation").val();
-		jq.getJSON('${ui.actionLink("laboratoryapp", "Queue", "searchQueue")}',
-			{ 
-				"date" : moment(date).format('DD/MM/YYYY'),
-				"phrase" : searchQueueFor,
-				"investigation" : investigation,
-				"currentPage" : 1
-			}
-		).success(function(data) {
-			if (data.length === 0) {
-				jq().toastmessage('showNoticeToast', "No match found!");
-			}
-			queueData.tests.removeAll();
-			jq.each(data, function(index, testInfo){
-				queueData.tests.push(testInfo);
-			});
-		});
-	});
-});
-</script>
-
-<script>
-var dialog, form, acceptForm;
-var scheduleDate = jq("#reschedule-date");
-var orderId = jq("#order");
-var  defaultSampleId = jq("#defaultSampleId");
-var details = { 'patientName' : 'Patient Name', 'startDate' : 'Start Date', 'test' : { 'name' : 'Test Name' } }; 
-var testDetails = { details : ko.observable(details) }
-
-function acceptTest() {
-
-	console.log(orderId.val());
-	console.log(defaultSampleId.val());
-
-	jq.post('${ui.actionLink("laboratoryapp", "queue", "acceptLabTest")}',
-		{ 'orderId' : orderId.val(), 'confirmedSampleId': defaultSampleId.val()},
-		function (data) {
-			if (data.status === "success") {
-				console.log("Test accepted");
-				var acceptedTest = ko.utils.arrayFirst(queueData.tests(), function(item) {
-					return item.orderId == orderId;
-				});
-				console.log("Accepted test (before update): " + acceptedTest);
-				queueData.tests.remove(acceptedTest);
-				acceptedTest.status = "accepted";
-				acceptedTest.sampleId = data.sampleId;				
-				console.log("Accepted test (after before update): " + acceptedTest);
-				queueData.tests.push(acceptedTest);
-			} else if (data.status === "fail") {
-				jq().toastmessage('showErrorToast', data.error);
-			}
-		},
-		'json'
-	);
-	acceptDialog.dialog( "close" );
-}
-
-jq(function(){
-	acceptDialog = jq("#accept-form").dialog({
-		autoOpen: false,
-		height: 250,
-		width: 400,
-		modal: true,
-		buttons: {
-			Accept: acceptTest,
-			Cancel: function() {
-				acceptDialog.dialog( "close" );
-			}
-		},
-		close: function() {
-			acceptForm[ 0 ].reset();
-		}
-	});
-
-	acceptForm = acceptDialog.find( "form" ).on( "submit", function( event ) {
-		event.preventDefault();
-		acceptTest(orderId.val());
-	});
-
-	ko.applyBindings(testDetails, jq("#reschedule-form")[0]);
-});
-
-jq(function(){	
-	dialog = jq("#reschedule-form").dialog({
-		autoOpen: false,
-		height: 350,
-		width: 400,
-		modal: true,
-		buttons: {
-			Reschedule: saveSchedule,
-			Cancel: function() {
-				dialog.dialog( "close" );
-			}
-		},
-		close: function() {
-			form[ 0 ].reset();
-			allFields.removeClass( "ui-state-error" );
-		}
-	});
-	
-	form = dialog.find( "form" ).on( "submit", function( event ) {
-		event.preventDefault();
-		saveSchedule();
-	});
-
-	ko.applyBindings(testDetails, jq("#reschedule-form")[0]);
-
-});
-
-function saveSchedule() {
-	jq.post('${ui.actionLink("laboratoryapp", "queue", "rescheduleTest")}',
-		{ "orderId" : orderId.val(), "rescheduledDate" : moment(scheduleDate.val()).format('DD/MM/YYYY') },
-		function (data) {
-			if (data.status === "fail") {
-				jq().toastmessage('showErrorToast', data.error);
-			} else {				
-				jq().toastmessage('showSuccessToast', data.message);
-				var rescheduledTest = ko.utils.arrayFirst(queueData.tests(), function(item) {
-					return item.orderId == orderId.val();
-				});
-				queueData.tests.remove(rescheduledTest);
-				dialog.dialog("close");
-			}
-		},
-		'json'
-	);
-}
-
-function reschedule(orderId) {
-	jq("#reschedule-form #order").val(orderId);
-	var details = ko.utils.arrayFirst(queueData.tests(), function(item) {
-		return item.orderId == orderId;
-	});
-	testDetails.details(details);
-	dialog.dialog( "open" );
-}
-
-function accept(orderId) {
-	jq("#reschedule-form #order").val(orderId);
-
-	jq.post('${ui.actionLink("laboratoryapp", "queue", "fetchSampleID")}',
-			{ 'orderId' : orderId },
-			function (data) {
-				if (data) {
-
-					defaultSampleId.val(data.defaultSampleId);
-					acceptDialog.dialog( "open" );
-
-				} else{
-					jq().toastmessage('showErrorToast', data.error);
-				}
-			},
-			'json'
-	);
-}
-
-</script>
