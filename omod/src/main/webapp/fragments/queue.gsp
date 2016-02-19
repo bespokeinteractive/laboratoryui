@@ -17,17 +17,43 @@
 
 <div>
 	<form>
+		
+		
 		<fieldset>
-			${ui.includeFragment("uicommons", "field/datetimepicker", [id: 'referred-date', label: 'Date Ordered', formFieldName: 'referredDate', useTime: false, defaultToday: true])}
-			<label for="search-queue-for">Patient Identifier/Name</label>
-			<input id="search-queue-for"/>
-			<label for="investigation">Investigation</label>
-			<select name="investigation" id="investigation">
-				<option value="0">ALL</option>
-				<% investigations.each { investigation -> %>
-					<option value="${investigation.id}">${investigation.name.name}</option>
-				<% } %>	
-			</select>
+			<div class="onerow">
+				<div class="col4">
+					<label for="referred-date-display">Date Ordered </label>
+				</div>
+				
+				<div class="col4">
+					<label for="search-queue-for">Patient Identifier/Name</label>
+				</div>
+				
+				<div class="col4 last">
+					<label for="investigation">Investigation</label>
+				</div>
+			</div>
+			
+			<div class="onerow">
+				<div class="col4">
+					${ui.includeFragment("uicommons", "field/datetimepicker", [id: 'referred-date', label: 'Date Ordered', formFieldName: 'referredDate', useTime: false, defaultToday: true])}
+				</div>
+				
+				<div class="col4">
+					<input id="search-queue-for" type="text"/>
+				</div>
+				
+				<div class="col4 last">
+					<select name="investigation" id="investigation">
+						<option value="0">ALL</option>
+						<% investigations.each { investigation -> %>
+							<option value="${investigation.id}">${investigation.name.name}</option>
+						<% } %>	
+					</select>
+				</div>
+			</div>
+		
+			<br/>
 			<br/>
 			<input type="button" value="Get patients" id="get-tests"/>
 		</fieldset>
