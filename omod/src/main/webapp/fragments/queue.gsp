@@ -205,15 +205,15 @@
 <table id="test-queue" >
 	<thead>
 		<tr>
-			<th>Date</th>
-			<th>Patient ID</th>
-			<th>Name</th>
-			<th>Gender</th>
-			<th>Age</th>
-			<th>Test</th>
-			<th>Accept</th>
-			<th>Sample ID</th>
-			<th>Reschedule</th>			
+			<th style="width: 90px;">Date</th>
+			<th style="width: 160px;">Patient ID</th>
+			<th width="*">Name</th>
+			<th style="width: 80px;">Gender</th>
+			<th style="width: 60px;">Age</th>
+			<th style="width: 80px;">Test</th>
+			<th style="width: 80px;">Accept</th>
+			<th style="width: 95px;">Sample ID</th>
+			<th style="width: 95px;">Reschedule</th>			
 		</tr>
 	</thead>
 	<tbody data-bind="foreach: tests">

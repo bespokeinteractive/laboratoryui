@@ -257,7 +257,6 @@
 					<li><a href="#queue">Queue</a></li>
 					<li><a href="#worklist">Worklist</a></li>
 					<li><a href="#results">Results</a></li>
-					<li><a href="#reports">Reports</a></li>
 					<li><a href="#status">Functional Status</a></li>
 					<li><a href="#tests">Test Orders</a></li>
 					
@@ -279,10 +278,6 @@
 
 				<div id="results">
 					${ ui.includeFragment("laboratoryapp", "editResults") }
-				</div>
-				
-				<div id="reports">
-					${ ui.includeFragment("laboratoryapp", "patientReports") }
 				</div>
 				
 				<div id="status">
