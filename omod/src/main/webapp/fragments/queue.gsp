@@ -1,13 +1,25 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.0/moment.js"></script>
 
 <script>
-	var queueData = new QueueData();
-	var rescheduleDialog, rescheduleForm, acceptForm;
-	var scheduleDate = jq("#reschedule-date");
-	var orderId = jq("#order");
-	var  defaultSampleId = jq("#defaultSampleId");
-	var details = { 'patientName' : 'Patient Name', 'startDate' : 'Start Date', 'test' : { 'name' : 'Test Name' } }; 
-	var testDetails = { details : ko.observable(details) }
+	var queueData,
+		rescheduleDialog,
+		rescheduleForm,
+		acceptForm,
+		scheduleDate,
+		orderId,
+		defaultSampleId,
+		details,
+		testDetails;
+
+	jq(function(){
+		queueData = new QueueData();
+		rescheduleDialog, rescheduleForm, acceptForm;
+		scheduleDate = jq("#reschedule-date");
+		orderId = jq("#order");
+		defaultSampleId = jq("#defaultSampleId");
+		details = { 'patientName' : 'Patient Name', 'startDate' : 'Start Date', 'test' : { 'name' : 'Test Name' } }; 
+		testDetails = { details : ko.observable(details) }
+	});
 
 	function acceptTest() {
 
