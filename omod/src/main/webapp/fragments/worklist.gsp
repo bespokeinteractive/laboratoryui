@@ -1,28 +1,3 @@
-<script>
-	jq(function(){		
-		jq('#get-worklist').on('click', function () {
-			var date = moment(jq('#accepted-date-field').val()).format('DD/MM/YYYY');
-			var searchWorklistFor = jq("#search-worklist-for").val();
-			var investigation = jq("#investigation").val();
-			jq.getJSON('${ui.actionLink("laboratoryapp", "worklist", "searchWorkList")}',
-				{ 
-					"date" : date,
-					"phrase" : searchWorklistFor,
-					"investigation" : investigation
-				}
-			).success(function(data) {
-				if (data.length === 0) {
-					jq().toastmessage('showNoticeToast', "No match found!");
-				}
-				workList.items.removeAll();
-				jq.each(data, function(index, testInfo){
-					workList.items.push(testInfo);
-				});
-			});
-		});
-	});
-</script>
-
 <div>
 	<form>
 		<fieldset>
@@ -36,7 +11,7 @@
 				</div>
 				
 				<div class="col4 last">
-					<label for="investigation">Investigation</label>
+					<label for="investigation-worklist">Investigation</label>
 				</div>
 			</div>
 			
@@ -50,8 +25,8 @@
 				</div>
 				
 				<div class="col4 last">
-					<select name="investigation" id="investigation">
-						<option>Select an investigation</option>
+					<select name="investigation" id="investigation-worklist">
+						<option value="0">Select an investigation</option>
 						<% investigations.each { investigation -> %>
 							<option value="${investigation.id}">${investigation.name.name}</option>
 						<% } %>	
@@ -59,7 +34,7 @@
 				</div>
 			</div>
 			
-			<div class="onerow">
+			<div class="onerow" style="margin-top: 50px">
 				<div class="col4">
 					<label for="include-result">
 						<input type="checkbox" id="include-result" >
@@ -68,8 +43,8 @@
 				</div>
 				
 				<div class="col5 last" style="padding-top: 5px">
-					<button id="print-worklist">Print Worklist</button>
-					<button id="export-worklist">Export Worklist</button>
+					<button type="button" class="task" id="print-worklist">Print Worklist</button>
+					<button type="button" class="cancel" id="export-worklist">Export Worklist</button>
 				</div>
 				
 

@@ -1,49 +1,136 @@
 <% ui.includeJavascript("laboratoryapp", "jQuery.print.js") %>
 
 <script>
-    var editResultsDate;
+    
+	
     jq(function(){
         jq('#date').datepicker("option", "dateFormat", "dd/mm/yy");
 
-        jq('#get-results').on('click', function () {
-             editResultsDate = moment(jq('#accepted-date-edit-field').val()).format('DD/MM/YYYY');
-            var searchResultsFor = jq("#search-results-for").val();
-            var investigation = jq("#investigation").val();
+        
+		
+    });
+	
+    var editResultsDialog,
+		editResultsForm,
+		editResultsParameterOpts = { editResultsParameterOptions : ko.observableArray([]) };
 
-            jq.getJSON('${ui.actionLink("laboratoryapp", "editResults", "searchForResults")}',
-                    {
-                        "date" : editResultsDate,
-                        "phrase" : searchResultsFor,
-                        "investigation" : investigation
-                    }
-            ).success(function(data) {
-                        if (data.length === 0) {
-                            jq().toastmessage('showNoticeToast', "No match found!");
-                        }
-                        result.items.removeAll();
-                        jq.each(data, function(index, testInfo){
-                            result.items.push(testInfo);
-                        });
-                    });
+    jq(function(){
+        ko.applyBindings(editResultsParameterOpts, jq("#edit-result-form")[0]);
+
+        editResultsDialog = jq("#edit-result-form").dialog({
+            autoOpen: false,
+            modal: true,
+            width: 350,
+            buttons: {
+                Save: saveEditResult,
+                Cancel: function() {
+                    editResultsDialog.dialog( "close" );
+                }
+            },
+            close: function() {
+                editResultsForm[0].reset();
+            }
         });
+
+        editResultsForm = editResultsDialog.find( "form" ).on( "submit", function( event ) {
+            event.preventDefault();
+            saveEditResult();
+        });
+    });
+
+    function showEditResultForm(testId) {
+        getEditResultTempLate(testId);
+        editResultsForm.find("#edit-result-id").val(testId);
+        editResultsDialog.dialog( "open" );
+    }
+
+    function getEditResultTempLate(testId) {
+        jq.getJSON('${ui.actionLink("laboratoryapp", "result", "getResultTemplate")}',
+                { "testId" : testId }
+        ).success(function(editResultsParameterOptions){
+                    editResultsParameterOpts.editResultsParameterOptions.removeAll();
+                    var details = ko.utils.arrayFirst(result.items(), function(item) {
+                        return item.testId == testId;
+                    });
+                    jq.each(editResultsParameterOptions, function(index, editResultsParameterOption) {
+                        editResultsParameterOption['patientName'] = details.patientName;
+                        editResultsParameterOption['testName'] = details.test.name;
+                        editResultsParameterOption['startDate'] = details.startDate;
+                        editResultsParameterOpts.editResultsParameterOptions.push(editResultsParameterOption);
+                    });
+                });
+    }
+
+    function saveEditResult(){
+        var dataString = editResultsForm.serialize();
+        jq.ajax({
+            type: "POST",
+            url: '${ui.actionLink("laboratoryapp", "result", "saveResult")}',
+            data: dataString,
+            dataType: "json",
+            success: function(data) {
+                if (data.status === "success") {
+                    jq().toastmessage('showNoticeToast', data.message);
+                    editResultsDialog.dialog("close");
+                }
+            }
+        });
+    }
+
+    function loadPatientReport(patientId){
+        console.log(editResultsDate);
+        queryparamenters = "?patientId=" + patientId + '&selectedDate=' + editResultsDate;
+        window.location.replace('${ui.pageLink("laboratoryapp", "patientReport")}'+queryparamenters);
+    }
+    function Result() {
+        self = this;
+        self.items = ko.observableArray([]);
+    }
+    var result = new Result();
+
+    jq(function(){
+        ko.applyBindings(result, jq("#test-results")[0]);
     });
 </script>
 
 <div>
     <form>
         <fieldset>
-            ${ui.includeFragment("uicommons", "field/datetimepicker", [id: 'accepted-date-edit', label: 'Date', formFieldName: 'acceptedDate', useTime: false, defaultToday: true])}
-            <label for="search-results-for">Patient Identifier/Name</label>
-            <input id="search-results-for"/>
-            <label for="investigation">Investigation</label>
-            <select name="investigation" id="investigation">
-                <option>Select an investigation</option>
-                <% investigations.each { investigation -> %>
-                <option value="${investigation.id}">${investigation.name.name}</option>
-                <% } %>
-            </select>
+			<div class="onerow">
+				<div class="col4">
+					<label for="accepted-date-edit-display">Date </label>
+				</div>
+				
+				<div class="col4">
+					<label for="search-results-for">Patient Identifier/Name</label>
+				</div>
+				
+				<div class="col4 last">
+					<label for="investigation-results">Investigation</label>
+				</div>
+			</div>
+			
+			<div class="onerow">
+				<div class="col4">
+					${ui.includeFragment("uicommons", "field/datetimepicker", [id: 'accepted-date-edit', label: 'Date', formFieldName: 'acceptedDate', useTime: false, defaultToday: true])}
+				</div>
+				
+				<div class="col4">
+					<input id="search-results-for"/>
+				</div>
+				
+				<div class="col4 last">
+					<select name="investigation" id="investigation-results">
+						<option value="0">Select an investigation</option>
+						<% investigations.each { investigation -> %>
+						<option value="${investigation.id}">${investigation.name.name}</option>
+						<% } %>
+					</select>
+				</div>
+			</div>
+			
             <br/>
-            <input type="button" value="Get patients" id="get-results"/>
+            <br/>
         </fieldset>
     </form>
 </div>
@@ -116,89 +203,4 @@
 </div>
 
 
-<script>
-    var editResultsDialog,
-            editResultsForm,
-            editResultsParameterOpts = { editResultsParameterOptions : ko.observableArray([]) };
 
-    jq(function(){
-        ko.applyBindings(editResultsParameterOpts, jq("#edit-result-form")[0]);
-
-        editResultsDialog = jq("#edit-result-form").dialog({
-            autoOpen: false,
-            modal: true,
-            width: 350,
-            buttons: {
-                Save: saveEditResult,
-                Cancel: function() {
-                    editResultsDialog.dialog( "close" );
-                }
-            },
-            close: function() {
-                editResultsForm[0].reset();
-            }
-        });
-
-        editResultsForm = editResultsDialog.find( "form" ).on( "submit", function( event ) {
-            event.preventDefault();
-            saveEditResult();
-        });
-    });
-
-    function showEditResultForm(testId) {
-        getEditResultTempLate(testId);
-        editResultsForm.find("#edit-result-id").val(testId);
-        editResultsDialog.dialog( "open" );
-    }
-
-    function getEditResultTempLate(testId) {
-        jq.getJSON('${ui.actionLink("laboratoryapp", "result", "getResultTemplate")}',
-                { "testId" : testId }
-        ).success(function(editResultsParameterOptions){
-                    editResultsParameterOpts.editResultsParameterOptions.removeAll();
-                    var details = ko.utils.arrayFirst(result.items(), function(item) {
-                        return item.testId == testId;
-                    });
-                    jq.each(editResultsParameterOptions, function(index, editResultsParameterOption) {
-                        editResultsParameterOption['patientName'] = details.patientName;
-                        editResultsParameterOption['testName'] = details.test.name;
-                        editResultsParameterOption['startDate'] = details.startDate;
-                        editResultsParameterOpts.editResultsParameterOptions.push(editResultsParameterOption);
-                    });
-                });
-    }
-
-    function saveEditResult(){
-        var dataString = editResultsForm.serialize();
-        jq.ajax({
-            type: "POST",
-            url: '${ui.actionLink("laboratoryapp", "result", "saveResult")}',
-            data: dataString,
-            dataType: "json",
-            success: function(data) {
-                if (data.status === "success") {
-                    jq().toastmessage('showNoticeToast', data.message);
-                    editResultsDialog.dialog("close");
-                }
-            }
-        });
-    }
-
-    function loadPatientReport(patientId){
-        console.log(editResultsDate);
-        queryparamenters = "?patientId=" + patientId + '&selectedDate=' + editResultsDate;
-        window.location.replace('${ui.pageLink("laboratoryapp", "patientReport")}'+queryparamenters);
-    }
-</script>
-
-<script>
-    function Result() {
-        self = this;
-        self.items = ko.observableArray([]);
-    }
-    var result = new Result();
-
-    jq(function(){
-        ko.applyBindings(result, jq("#test-results")[0]);
-    });
-</script>

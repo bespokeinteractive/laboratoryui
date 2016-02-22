@@ -7,6 +7,8 @@
 %>
 
 <script>
+	var editResultsDate;
+	
 	jq(function(){
 		jq(".lab-tabs").tabs();
 		
@@ -18,7 +20,10 @@
 				getWorklists();
 			}
 			else if(jq('#results').is(':visible')){
-				alert('Here3');
+				getResults();
+			}
+			else {
+				jq().toastmessage('showNoticeToast', "Tab Content not Available");
 			}
 		});
 		
@@ -47,7 +52,8 @@
 		function getWorklists() {
 			var date = moment(jq('#accepted-date-field').val()).format('DD/MM/YYYY');
 			var searchWorklistFor = jq("#search-worklist-for").val();
-			var investigation = jq("#investigation").val();
+			var investigation = jq("#investigation-worklist").val();
+			
 			jq.getJSON('${ui.actionLink("laboratoryapp", "worklist", "searchWorkList")}',
 				{ 
 					"date" : date,
@@ -65,12 +71,51 @@
 			});
 		}
 		
+		function getResults(){
+			var date = moment(jq('#accepted-date-edit-field').val()).format('DD/MM/YYYY');
+            var searchResultsFor = jq("#search-results-for").val();
+            var investigation = jq("#investigation-results").val();
+
+            jq.getJSON('${ui.actionLink("laboratoryapp", "editResults", "searchForResults")}',
+				{
+					"date" : date,
+					"phrase" : searchResultsFor,
+					"investigation" : investigation
+				}
+            ).success(function(data) {
+				if (data.length === 0) {
+					jq().toastmessage('showNoticeToast', "No match found!");
+				}
+				result.items.removeAll();
+				jq.each(data, function(index, testInfo){
+					result.items.push(testInfo);
+				});
+			});
+		}
+		
 		jq('#referred-date').on("change", function (dateText) {
 			getQueuePatients();
         });
 		
+		jq('#accepted-date').on("change", function (dateText) {
+			getWorklists();
+        });
+		
+		jq('#accepted-date-edit').on("change", function (dateText) {
+			editResultsDate = moment(jq('#accepted-date-edit-field').val()).format('DD/MM/YYYY');
+			getResults();
+        });
+		
 		jq('#investigation').bind('change keyup', function() {
 			getQueuePatients();
+		});
+		
+		jq('#investigation-worklist').bind('change keyup', function() {
+			getWorklists();
+		});
+		
+		jq('#investigation-results').bind('change keyup', function() {
+			getResults();
 		});
 		
 		jq('input').keydown(function (e) {
@@ -78,6 +123,12 @@
 			if (key == 9 || key == 13) {
 				if (jq(this).attr('id') == 'search-queue-for'){
 					getQueuePatients();
+				}
+				else if (jq(this).attr('id') == 'search-worklist-for'){
+					getWorklists();
+				}
+				else if (jq(this).attr('id') == 'search-results-for'){
+					getResults();
 				}
 			}
 		}); 
@@ -103,7 +154,8 @@
 		width: 97.4%;
 	}
 	#referred-date label,
-	#accepted-date label{
+	#accepted-date label,
+	#accepted-date-edit label{
 		display: none;
 	}
 	form input[type="text"]{
@@ -132,13 +184,11 @@
 		margin-top: 10px;
 	}
 	#refresh{
-		background: #88af28 -moz-linear-gradient(center top , #a1d030, #88af28) repeat scroll 0 0;
-		border-top: 1px solid #88af28;
-		border-left: 1px solid #88af28;
-		border-right: 1px solid #88af28;
-		border-radius: 3px 3px 0px 0px;
+		border: 1px none #88af28;
 		color: #fff !important;
 		float: right;
+		margin-right: -10px;
+		margin-top: 5px;
 	}
 	#refresh a i{
 		font-size: 12px;
@@ -151,8 +201,12 @@
 	}
 	.col5 button{
 		float: right;
-		margin-left: 10px;
-		min-width: 300px;
+		margin-left: 3px;
+		margin-right: 0;
+		min-width: 180px;
+	}
+	form input[type="checkbox"] {
+		margin: 5px 8px 8px;
 	}
 </style>
 <header>
@@ -199,7 +253,7 @@
 					<li><a href="#tests">Test Orders</a></li>
 					
 					<li id="refresh" class="ui-state-default">
-						<a style="color:#fff">
+						<a style="color:#fff" class="button confirm">
 							<i class="icon-refresh"></i>
 							Get Patients
 						</a>
