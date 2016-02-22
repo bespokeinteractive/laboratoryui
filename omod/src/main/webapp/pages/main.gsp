@@ -190,6 +190,7 @@
 	}
 	
 	#queue table, #worklist table, #results table{
+		font-size: 14px;
 		margin-top: 10px;
 	}
 	#refresh{

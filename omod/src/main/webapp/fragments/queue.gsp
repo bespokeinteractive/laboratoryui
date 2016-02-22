@@ -205,15 +205,15 @@
 <table id="test-queue" >
 	<thead>
 		<tr>
-			<th style="width: 90px;">Date</th>
-			<th style="width: 160px;">Patient ID</th>
-			<th width="*">Name</th>
-			<th style="width: 80px;">Gender</th>
-			<th style="width: 60px;">Age</th>
-			<th style="width: 80px;">Test</th>
-			<th style="width: 80px;">Accept</th>
-			<th style="width: 95px;">Sample ID</th>
-			<th style="width: 95px;">Reschedule</th>			
+			<th>Date</th>
+			<th>Patient ID</th>
+			<th>Name</th>
+			<th style="width: 60px">Gender</th>
+			<th style="width:30px">Age</th>
+			<th>Test</th>
+			<th>Accept</th>
+			<th style="width: 70px;">Sample ID</th>
+			<th style="width: 80px;">Reschedule</th>			
 		</tr>
 	</thead>
 	<tbody data-bind="foreach: tests">
@@ -222,12 +222,7 @@
 			<td data-bind="text: patientIdentifier"></td>
 			<td data-bind="text: patientName"></td>
 			<td data-bind="text: gender"></td>
-			<td>
-				<span data-bind="if: age < 1">Less than 1 year</span>
-				<!-- ko if: age > 1 -->
-					<span data-bind="value: age"></span>
-				<!-- /ko -->
-			</td>
+			<td data-bind="text: age"></td>
 			<td data-bind="text: test.name"></td>
 			<td data-bind="attr: { class : 'test-status-' + orderId }">
 				<span data-bind="if: status">Accepted</span>
