@@ -2,7 +2,7 @@
 
 <script>
 	var queueData = new QueueData();
-	var dialog, form, acceptForm;
+	var rescheduleDialog, rescheduleForm, acceptForm;
 	var scheduleDate = jq("#reschedule-date");
 	var orderId = jq("#order");
 	var  defaultSampleId = jq("#defaultSampleId");
@@ -63,7 +63,7 @@
 	});
 
 	jq(function(){	
-		dialog = jq("#reschedule-form").dialog({
+		rescheduleDialog = jq("#reschedule-form").dialog({
 			autoOpen: false,
 			height: 350,
 			width: 400,
@@ -71,16 +71,16 @@
 			buttons: {
 				Reschedule: saveSchedule,
 				Cancel: function() {
-					dialog.dialog( "close" );
+					rescheduleDialog.dialog( "close" );
 				}
 			},
 			close: function() {
-				form[ 0 ].reset();
+				rescheduleForm[ 0 ].reset();
 				allFields.removeClass( "ui-state-error" );
 			}
 		});
 		
-		form = dialog.find( "form" ).on( "submit", function( event ) {
+		rescheduleForm = rescheduleDialog.find( "form" ).on( "submit", function( event ) {
 			event.preventDefault();
 			saveSchedule();
 		});
@@ -101,7 +101,7 @@
 						return item.orderId == orderId.val();
 					});
 					queueData.tests.remove(rescheduledTest);
-					dialog.dialog("close");
+					rescheduleDialog.dialog("close");
 				}
 			},
 			'json'
@@ -114,7 +114,7 @@
 			return item.orderId == orderId;
 		});
 		testDetails.details(details);
-		dialog.dialog( "open" );
+		rescheduleDialog.dialog( "open" );
 	}
 
 	function accept(orderId) {
