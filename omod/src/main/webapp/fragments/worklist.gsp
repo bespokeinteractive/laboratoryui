@@ -154,31 +154,31 @@
 	</form>
 </div>
 <script>
-	var dialog, 
-	form,
+	var resultDialog, 
+	resultForm,
 	selectedTestDetails,
 	parameterOpts = { parameterOptions : ko.observableArray([]) };
 	
 	jq(function(){
 		ko.applyBindings(parameterOpts, jq("#result-form")[0]);
 		
-		dialog = jq("#result-form").dialog({
+		resultDialog = jq("#result-form").dialog({
 			autoOpen: false,
 			width: 600,
 			modal: true,
 			buttons: {
 				Save: saveResult,
 				Cancel: function() {
-					dialog.dialog( "close" );
+					resultDialog.dialog( "close" );
 				}
 			},
 			close: function() {
-				form[ 0 ].reset();
+				resultForm[ 0 ].reset();
 				allFields.removeClass( "ui-state-error" );
 			}
 		});
 		
-		form = dialog.find( "form" ).on( "submit", function( event ) {
+		resultForm = resultDialog.find( "form" ).on( "submit", function( event ) {
 			event.preventDefault();
 			saveResult();
 		});
@@ -187,8 +187,8 @@
 	function showResultForm(testDetail) {
 		selectedTestDetails = testDetail;
 		getResultTemplate(testDetail.testId);
-		form.find("#test-id").val(testDetail.testId);
-		dialog.dialog( "open" );
+		resultForm.find("#test-id").val(testDetail.testId);
+		resultDialog.dialog( "open" );
 	}
 	
 	function getResultTemplate(testId) {
@@ -209,7 +209,7 @@
 	}
 	
 	function saveResult(){
-		var dataString = form.serialize();
+		var dataString = resultForm.serialize();
 		jq.ajax({
 			type: "POST",
 			url: '${ui.actionLink("laboratoryapp", "result", "saveResult")}',
@@ -219,7 +219,7 @@
 				if (data.status === "success") {
 					jq().toastmessage('showNoticeToast', data.message);
 					workList.items.remove(selectedTestDetails);
-					dialog.dialog("close");
+					resultDialog.dialog("close");
 				}
 			}
 		});
@@ -227,30 +227,30 @@
 </script>
 
 <script>
-var rescheduleDialog, rescheduleForm;
+var reorderDialog, reorderForm;
 var scheduleDate = jq("#reorder-date");
 var orderId = jq("#order");
 var details = { 'patientName' : 'Patient Name', 'startDate' : 'Start Date', 'test' : { 'name' : 'Test Name' } }; 
 var testDetails = { details : ko.observable(details) }
 
 jq(function(){	
-	rescheduleDialog = jq("#reorder-form").dialog({
+	reorderDialog = jq("#reorder-form").dialog({
 		autoOpen: false,
 		width: 350,
 		modal: true,
 		buttons: {
 			"Re-order": saveSchedule,
 			Cancel: function() {
-				rescheduleDialog.dialog( "close" );
+				reorderDialog.dialog( "close" );
 			}
 		},
 		close: function() {
-			rescheduleForm[ 0 ].reset();
+			reorderForm[ 0 ].reset();
 			allFields.removeClass( "ui-state-error" );
 		}
 	});
 	
-	rescheduleForm = rescheduleDialog.find( "form" ).on( "submit", function( event ) {
+	reorderForm = reorderDialog.find( "form" ).on( "submit", function( event ) {
 		event.preventDefault();
 		saveSchedule();
 	});
@@ -265,7 +265,7 @@ function reorder(orderId) {
 		return item.orderId == orderId;
 	});
 	testDetails.details(details);
-	rescheduleDialog.dialog( "open" );
+	reorderDialog.dialog( "open" );
 }
 
 function saveSchedule() {
@@ -280,7 +280,7 @@ function saveSchedule() {
 					return item.orderId == orderId.val();
 				});
 				workList.items.remove(reorderedTest);
-				rescheduleDialog.dialog("close");
+				reorderDialog.dialog("close");
 			}
 		},
 		'json'
