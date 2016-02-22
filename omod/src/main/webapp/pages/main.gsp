@@ -4,6 +4,7 @@
 	
 	ui.includeJavascript("uicommons", "moment.js")
 	ui.includeJavascript("laboratoryapp", "jQuery.print.js")
+	ui.includeJavascript("laboratoryapp", "jq.browser.select.js")
 %>
 
 <script>
@@ -175,6 +176,14 @@
 		margin-left: -31px;
 		margin-top: 8px;
 		position: absolute;
+	}
+	.webkit .add-on {
+	  color:#F26522;
+	  float:right;
+	  left:auto;
+	  margin-left:-31px;
+	  margin-top:-27px!important;
+	  position:relative!important;
 	}
 	.toast-item {
 		background: #333 none repeat scroll 0 0;
