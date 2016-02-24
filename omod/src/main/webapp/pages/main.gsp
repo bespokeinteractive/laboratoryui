@@ -24,9 +24,27 @@
 				getResults();
 			}
 			else {
-				jq().toastmessage('showNoticeToast', "Tab Content not Available");
+				jq().toastmessage('showErrorToast', "Tab Content not Available");
 			}
 		});
+		
+		jq("#inline-tabs li").click(function() {
+			if (jq(this).attr("aria-controls") == "queue"){
+				jq('#refresh a').html('<i class="icon-refresh"></i> Get Patients');
+			}
+			else if (jq(this).attr("aria-controls") == "worklist"){
+				jq('#refresh a').html('<i class="icon-refresh"></i> Get Worklist');
+			}
+			else if (jq(this).attr("aria-controls") == "results"){
+				jq('#refresh a').html('<i class="icon-refresh"></i> Get Results');
+			}
+			else if (jq(this).attr("aria-controls") == "status"){
+				jq('#refresh a').html('<i class="icon-refresh"></i> Get Functional Status');
+			}
+			else if (jq(this).attr("aria-controls") == "tests"){
+				jq('#refresh a').html('<i class="icon-refresh"></i> Get Test Orders');
+			}
+        });
 		
 		function getQueuePatients() {
 			var date = jq("#referred-date-field").val();
@@ -41,7 +59,7 @@
 				}
 			).success(function(data) {
 				if (data.length === 0) {
-					jq().toastmessage('showNoticeToast', "No match found!");
+					jq().toastmessage('showErrorToast', "No match found!");
 				}
 				queueData.tests.removeAll();
 				jq.each(data, function(index, testInfo){
@@ -63,7 +81,7 @@
 				}
 			).success(function(data) {
 				if (data.length === 0) {
-					jq().toastmessage('showNoticeToast', "No match found!");
+					jq().toastmessage('showErrorToast', "No match found!", true);
 				}
 				workList.items.removeAll();
 				jq.each(data, function(index, testInfo){
@@ -85,7 +103,7 @@
 				}
             ).success(function(data) {
 				if (data.length === 0) {
-					jq().toastmessage('showNoticeToast', "No match found!");
+					jq().toastmessage('showErrorToast', "No match found!");
 				}
 				result.items.removeAll();
 				jq.each(data, function(index, testInfo){
@@ -217,6 +235,9 @@
 	}
 	form input[type="checkbox"] {
 		margin: 5px 8px 8px;
+	}
+	.toast-item-image {
+		top: 25px;
 	}
 </style>
 <header>
