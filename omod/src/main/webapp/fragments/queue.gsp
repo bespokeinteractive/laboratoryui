@@ -23,22 +23,17 @@
 
 	function acceptTest() {
 
-		console.log(orderId.val());
-		console.log(defaultSampleId.val());
 
 		jq.post('${ui.actionLink("laboratoryapp", "queue", "acceptLabTest")}',
 			{ 'orderId' : orderId.val(), 'confirmedSampleId': defaultSampleId.val()},
 			function (data) {
 				if (data.status === "success") {
-					console.log("Test accepted");
 					var acceptedTest = ko.utils.arrayFirst(queueData.tests(), function(item) {
-						return item.orderId == orderId;
+						return item.orderId == orderId.val();
 					});
-					console.log("Accepted test (before update): " + acceptedTest);
 					queueData.tests.remove(acceptedTest);
 					acceptedTest.status = "accepted";
 					acceptedTest.sampleId = data.sampleId;				
-					console.log("Accepted test (after before update): " + acceptedTest);
 					queueData.tests.push(acceptedTest);
 				} else if (data.status === "fail") {
 					jq().toastmessage('showErrorToast', data.error);
