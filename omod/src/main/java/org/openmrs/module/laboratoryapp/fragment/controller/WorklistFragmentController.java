@@ -23,15 +23,16 @@ import org.openmrs.ui.framework.fragment.FragmentModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.openmrs.module.appui.UiSessionContext;
 
 public class WorklistFragmentController {
 	private static Logger logger = LoggerFactory.getLogger(QueueFragmentController.class);
 
-	public void controller(FragmentModel model) {
+	public void controller(UiSessionContext sessionContext, FragmentModel model) {
+		sessionContext.requireAuthentication();
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 		String dateStr = sdf.format(new Date());
 		model.addAttribute("currentDate", dateStr);
-
 		LaboratoryService ls = (LaboratoryService) Context.getService(LaboratoryService.class);
 		Lab department = ls.getCurrentDepartment();
 		if(department!=null){
