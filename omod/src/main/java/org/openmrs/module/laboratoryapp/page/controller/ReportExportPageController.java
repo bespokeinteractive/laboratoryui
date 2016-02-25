@@ -1,5 +1,7 @@
 package org.openmrs.module.laboratoryapp.page.controller;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -28,10 +30,11 @@ public class ReportExportPageController {
 
 	private static Logger logger = LoggerFactory.getLogger(ReportExportPageController.class);
 
-	public FileDownload exportReport(
+	public FileDownload get(
 			@RequestParam(value = "worklistDate", required = false) String worklistDateString,
 			@RequestParam(value = "phrase", required = false) String phrase,
 			@RequestParam(value = "investigation", required = false) Integer investigationId,
+			@RequestParam(value = "includeResults", required = false) String includeResults,
 			UiUtils ui) {
 		LaboratoryService laboratoryService = Context.getService(LaboratoryService.class);
 		Date worklistDate;
@@ -47,23 +50,29 @@ public class ReportExportPageController {
 					allowableTests.addAll(testTreeMap.get(c));
 				}
 			}
-			List<LabTest> laboratoryTests = laboratoryService.getAcceptedLaboratoryTests(worklistDate, phrase, allowableTests);
-			List<TestModel> formattedLaboratoyTests = LaboratoryUtil.generateModelsFromTests(laboratoryTests, testTreeMap);
+			List<LabTest> laboratoryTests = laboratoryService.getAllLaboratoryTestsByDate(worklistDate, phrase, allowableTests);
+			List<TestModel> formattedLaboratoyTests = LaboratoryUtil.generateModelsForWorksheet(laboratoryTests, testTreeMap, includeResults);;
 			String filename = "Lab Worklist as of " + ui.formatDatePretty(worklistDate) + ".xls";
-			String contentType = "application/vnd.ms-excel";
-			return new FileDownload(filename, contentType, buildExcelDocument(formattedLaboratoyTests).getBytes());
+			String contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+			//String contentType = "application/vnd.ms-excel";
+			return new FileDownload(filename, contentType, buildExcelDocument(formattedLaboratoyTests));
 		} catch (ParseException e) {
 			logger.error("Error when parsing order date!", e.getMessage());
+		} catch (IOException e) {
+			logger.error("Error while generating excel document", e.getMessage());
 		}
 		return null;
 	}
 
-	private HSSFWorkbook buildExcelDocument(List<TestModel> tests) {
+	private byte[] buildExcelDocument(List<TestModel> tests) throws IOException {
 		HSSFWorkbook worklistBook = new HSSFWorkbook();
 		HSSFSheet worklistSheet = worklistBook.createSheet("Lab worklist");
 		setExcelHeader(worklistSheet);
 		setExcelRows(worklistSheet, tests);
-		return worklistBook;
+		ByteArrayOutputStream excelOutput = new ByteArrayOutputStream();
+
+		worklistBook.write(excelOutput);
+		return excelOutput.toByteArray();
 	}
 	
 	private void setExcelHeader(HSSFSheet excelSheet) {
@@ -89,11 +98,11 @@ public class ReportExportPageController {
 			excelRow.createCell(2).setCellValue(test.getPatientName());
 			excelRow.createCell(3).setCellValue(test.getAge());
 			excelRow.createCell(4).setCellValue(test.getGender());
-			excelRow.createCell(4).setCellValue(test.getSampleId());
-			excelRow.createCell(4).setCellValue(test.getInvestigation());
-			excelRow.createCell(4).setCellValue(test.getTest().getDisplayString());
-			excelRow.createCell(4).setCellValue(test.getTestName().getDisplayString());
-			excelRow.createCell(4).setCellValue(test.getValue());
+			excelRow.createCell(5).setCellValue(test.getSampleId());
+			excelRow.createCell(6).setCellValue(test.getInvestigation());
+			excelRow.createCell(7).setCellValue(test.getTest().getDisplayString());
+			excelRow.createCell(8).setCellValue(test.getTestName().getDisplayString());
+			excelRow.createCell(9).setCellValue(test.getValue());
 		}
 	}
 
