@@ -5,7 +5,17 @@
 <script type="text/javascript">
     var dataTable;
     var billableServices;
+    var serviceIds = [];
     jQuery(document).ready(function() {
+        jq('#functionalStatus').on('change', 'input.service-status', function() {
+            var index = jq.inArray(jq(this).val(), serviceIds);
+            if (index > -1) {
+                serviceIds.splice(index, 1);
+            } else {
+                serviceIds.push(jq(this).val());
+            }
+        });
+
         dataTable=jQuery('#functionalStatus').DataTable({
             searching: false,
             lengthChange: false,
@@ -15,7 +25,7 @@
             sort: false,
             dom: 't<"fg-toolbar ui-toolbar ui-corner-bl ui-corner-br ui-helper-clearfix datatables-info-and-pg"ip>',
             language: {
-                zeroRecords: 'No Investigations ordered.',
+                zeroRecords: 'No Service Found',
                 paginate: {
                     first: 'First',
                     previous: 'Previous',
@@ -44,8 +54,9 @@
 
                 _.each(billableServices, function(billableService) {
                     var isChecked = billableService.disable?"checked=checked":"";
-                    dataRows.push([billableService.name, '<input type="checkbox" "'+ isChecked + '">'])
+                    dataRows.push([billableService.name, '<input type="checkbox" class="service-status" "'+ isChecked + '" value="'+ billableService.serviceId +'">'])
                 });
+
 
                 dataTable.rows.add(dataRows);
                 dataTable.draw();
@@ -57,6 +68,7 @@
             }
         });
     }
+
 </script>
 
 <table id='functionalStatus'>
