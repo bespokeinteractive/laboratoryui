@@ -55,6 +55,9 @@
 		<require_module version="0.6.0">
 			org.openmrs.module.laboratory
 		</require_module>
+		<require_module version="1.4">
+			org.openmrs.module.appui
+		</require_module>
 	</require_modules>
 </module>
 

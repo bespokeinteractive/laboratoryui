@@ -9,14 +9,15 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.hospitalcore.model.Lab;
 import org.openmrs.module.laboratory.LaboratoryService;
 import org.openmrs.ui.framework.page.PageModel;
+import org.openmrs.module.appui.UiSessionContext;
 
 public class QueuePageController {
 
-	public void get(PageModel model) {
+	public void get(UiSessionContext sessionContext, PageModel model) {
+		sessionContext.requireAuthentication();
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 		String dateStr = sdf.format(new Date());
 		model.addAttribute("currentDate", dateStr);
-		
 		LaboratoryService ls = (LaboratoryService) Context.getService(LaboratoryService.class);
 		Lab department = ls.getCurrentDepartment();
 		if(department!=null){
