@@ -7,6 +7,7 @@
     var billableServices;
     var serviceIds = [];
     jQuery(document).ready(function() {
+
         jq('#functionalStatus').on('change', 'input.service-status', function() {
             var index = jq.inArray(jq(this).val(), serviceIds);
             if (index > -1) {
@@ -14,7 +15,9 @@
             } else {
                 serviceIds.push(jq(this).val());
             }
+            console.log(serviceIds)
         });
+
 
         dataTable=jQuery('#functionalStatus').DataTable({
             searching: false,
@@ -38,8 +41,25 @@
         getBillableServices();
 
         jQuery('#functionalStatus tbody').on("click", function(){
+            jq('#submitSave').on("click", function(){
+                console.log('Hit')
 
+                jq.post('${ui.actionLink('laboratoryapp','functionalStatus','updateBillableServices')}',
+                        { "serviceIds" : serviceIds.toString() },
+                        function (data) {
+                            if (data.status === "fail") {
+                                jq().toastmessage('showErrorToast', data.error);
+                            } else {
+                                jq().toastmessage('showSuccessToast', data.message);
+
+                            }
+                        },
+                        'json'
+                );
+            });
         });
+
+
     });
 
     function getBillableServices() {
@@ -53,8 +73,8 @@
                var dataRows = [];
 
                 _.each(billableServices, function(billableService) {
-                    var isChecked = billableService.disable?"checked=checked":"";
-                    dataRows.push([billableService.name, '<input type="checkbox" class="service-status" "'+ isChecked + '" value="'+ billableService.serviceId +'">'])
+                    var isChecked = (billableService.disable === true) ?"checked=checked":"";
+                    dataRows.push([billableService.name, '<input type="checkbox" class="service-status" '+ isChecked + '" value="'+ billableService.serviceId +'">'])
                 });
 
 
@@ -81,7 +101,6 @@
     <tbody>
     </tbody>
 </table>
-<form method="POST">
+
     <input type='hidden' id='serviceIds' name='serviceIds' value=''/>
-    <input type='submit' value='Save'/>
-</form>
+    <input type='submit' id='submitSave' value='Save'/>

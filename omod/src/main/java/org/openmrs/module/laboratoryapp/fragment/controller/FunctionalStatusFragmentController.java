@@ -39,9 +39,30 @@ public class FunctionalStatusFragmentController {
         return SimpleObject.fromCollection(billableServices, uiUtils, "name", "serviceId", "disable");
     }
 
-    private void saveBillableService(Integer id) {
+    public void updateBillableServices(
+            @RequestParam(value = "serviceIds", required = false) String serviceIds
+           ) {
+
+        if (!StringUtils.isBlank(serviceIds)) {
+            String[] ids = serviceIds.split(",");
+            for (String id : ids) {
+                try {
+                    if (!StringUtils.isBlank(id)) {
+                      Integer sid = Integer.parseInt(id);
+                        saveBillableService(sid);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+    }
+
+
+    private void saveBillableService(Integer serviceId) {
         BillingService billingService = Context.getService(BillingService.class);
-        BillableService billableService = billingService.getServiceById(id);
+        BillableService billableService = billingService.getServiceById(serviceId);
         if (billableService != null) {
             billableService.setDisable(!billableService.getDisable());
             billingService.saveService(billableService);
