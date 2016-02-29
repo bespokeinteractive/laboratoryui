@@ -255,7 +255,7 @@
 			<p data-bind="text: 'Patient Name: ' + details().patientName"></p> 
 			<p data-bind="text: 'Test: ' + details().test.name"></p>
 			<p data-bind="text: 'Date: ' + details().startDate"></p>
-            ${ui.includeFragment("uicommons", "field/datetimepicker", [id: 'reschedule-date', label: 'Reschedule To', formFieldName: 'rescheduleDate1', useTime: false, defaultToday: true])}
+            		${ui.includeFragment("uicommons", "field/datetimepicker", [id: 'reschedule-date', label: 'Reschedule To', formFieldName: 'rescheduleDate', useTime: false, defaultToday: true])}
 			<input type="hidden" id="order" name="order" >
 
 			<!-- Allow form submission with keyboard without duplicating the dialog button -->
