@@ -14,7 +14,7 @@
 	jq(function(){
 		queueData = new QueueData();
 		rescheduleDialog, rescheduleForm, acceptForm;
-		scheduleDate = jq("#reschedule-date");
+		scheduleDate = jq("#reschedule-date-field");
 		orderId = jq("#order");
 		defaultSampleId = jq("#defaultSampleId");
 		details = { 'patientName' : 'Patient Name', 'startDate' : 'Start Date', 'test' : { 'name' : 'Test Name' } }; 
@@ -255,8 +255,7 @@
 			<p data-bind="text: 'Patient Name: ' + details().patientName"></p> 
 			<p data-bind="text: 'Test: ' + details().test.name"></p>
 			<p data-bind="text: 'Date: ' + details().startDate"></p>
-			<label for="name">Reschedule To</label>
-			<input type="date" name="rescheduleDate" id="reschedule-date" class="text ui-widget-content ui-corner-all">
+            ${ui.includeFragment("uicommons", "field/datetimepicker", [id: 'reschedule-date', label: 'Reschedule To', formFieldName: 'rescheduleDate1', useTime: false, defaultToday: true])}
 			<input type="hidden" id="order" name="order" >
 
 			<!-- Allow form submission with keyboard without duplicating the dialog button -->
