@@ -3,9 +3,54 @@
 %>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.0/moment.js"></script>
+<script>
+    var dateFormat = require('dateformat');
+    var now = new Date();
+    dateFormat(now, "dddd, mmmm dS, yyyy");
+</script>
 
+<script>
+    function strReplace(word) {
+        var res = word.replace("[", "");
+        res=res.replace("]","");
+        return res;
+    }
 
-${ui.includeFragment("coreapps", "patientHeader", [patient: patient])}
+    jQuery(document).ready(function () {
+        jq(".dashboard-tabs").tabs();
+
+        jq('#surname').html(strReplace('${patient.names.familyName}')+',<em>surname</em>');
+        jq('#othname').html(strReplace('${patient.names.givenName}')+' &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <em>other names</em>');
+        jq('#agename').html('${patient.age} years ('+ moment('${patient.birthdate}').format('DD,MMM YYYY') +')');
+    });
+</script>
+
+    <div class="patient-header new-patient-header">
+        <div class="demographics">
+    <h1>
+    <span id="surname">${patient.names.familyName},<em>surname</em></span>
+    <span id="othname">${patient.names.givenName} &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<em>other names</em></span>
+
+<span class="gender-age">
+    <span>
+        <% if (patient.gender == "F") { %>
+        Female
+        <% } else { %>
+        Male
+        <% } %>
+    </span>
+    <span id="agename">${patient.age} years (15.Oct.1996) </span>
+
+</span>
+    </h1>
+            </div>
+    <div class="identifiers">
+        <em>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Patient ID</em>
+        <span>${patient.getPatientIdentifier()}</span>
+        <br>
+
+    </div>
+    <div/>
 
 <table id="patient-report">
     <thead>
@@ -14,6 +59,7 @@ ${ui.includeFragment("coreapps", "patientHeader", [patient: patient])}
         <th>Result</th>
         <th>Units</th>
         <th>Reference Range</th>
+        <th>Date Ordered</th>
     </tr>
     </thead>
     <tbody data-bind="foreach: items">
@@ -42,6 +88,10 @@ ${ui.includeFragment("coreapps", "patientHeader", [patient: patient])}
                 <span data-bind="text: 'Child:' + lowAbsolute + '//' + hiAbsolute"></span>
             </div>
         </td>
+        <td>
+            ${test}
+        </td>
+
     </tr>
     </tbody>
 </table>
