@@ -24,6 +24,19 @@
         jq('#agename').html('${patient.age} years ('+ moment('${patient.birthdate}').format('DD,MMM YYYY') +')');
     });
 </script>
+<style>
+.new-patient-header .demographics .gender-age {
+    font-size: 14px;
+    margin-left: -55px;
+    margin-top: 12px;
+}
+.new-patient-header .demographics .gender-age span {
+    border-bottom: 1px none #ddd;
+}
+.new-patient-header .identifiers {
+    margin-top: 5px;
+}
+</style>
 
     <div class="patient-header new-patient-header">
         <div class="demographics">
