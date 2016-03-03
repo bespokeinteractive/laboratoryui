@@ -3,6 +3,7 @@ package org.openmrs.module.laboratoryapp.page.controller;
 import org.openmrs.*;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.hospitalcore.model.LabTest;
+import org.openmrs.module.hospitalcore.util.PatientDashboardConstants;
 import org.openmrs.module.laboratory.LaboratoryService;
 import org.openmrs.module.laboratoryapp.util.LaboratoryTestUtil;
 import org.openmrs.module.laboratoryapp.util.LaboratoryUtil;
@@ -31,7 +32,13 @@ public class PatientReportPageController {
             PageModel model,
             UiUtils ui) {
         Patient patient = Context.getPatientService().getPatient(patientId);
+
         model.addAttribute("patient", patient);
+        model.addAttribute("patientIdentifier", patient.getPatientIdentifier());
+        model.addAttribute("age", patient.getAge());
+        model.addAttribute("gender" , patient.getGender());
+        model.addAttribute("name", patient.getNames());
+
         LaboratoryService ls = Context.getService(LaboratoryService.class);
 
         Date selectedDate = new Date();
@@ -52,7 +59,6 @@ public class PatientReportPageController {
                     Map<Concept, Set<Concept>> testTreeMap = LaboratoryTestUtil.getAllowableTests();
                     List<TestResultModel> trms = renderTests(tests, testTreeMap);
                     trms = formatTestResult(trms);
-                    //model.addAttribute("tests", trms);
 
                     List<SimpleObject> results = SimpleObject.fromCollection(trms, ui,
                             "investigation", "set", "test", "value", "hiNormal",
@@ -60,6 +66,7 @@ public class PatientReportPageController {
                             "unit", "level", "concept", "encounterId", "testId");
                     SimpleObject currentResults = SimpleObject.create("data", results);
                     model.addAttribute("currentResults", currentResults);
+                    model.addAttribute("test", ui.formatDatePretty(tests.get(0).getOrder().getStartDate()));
 
                 }
             } catch (ParseException e) {
