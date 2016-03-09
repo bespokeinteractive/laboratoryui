@@ -1,6 +1,6 @@
 <%
     ui.includeCss("uicommons", "datatables/dataTables_jui.css")
-    ui.includeJavascript("patientqueueui", "jquery.dataTables.min.js")
+    ui.includeJavascript("patientqueueapp", "jquery.dataTables.min.js")
 %>
 <script type="text/javascript">
     var dataTable;
