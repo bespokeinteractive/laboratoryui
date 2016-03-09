@@ -2,17 +2,20 @@ package org.openmrs.module.laboratoryapp.page.controller;
 
 import org.openmrs.*;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.appui.UiSessionContext;
 import org.openmrs.module.hospitalcore.model.LabTest;
 import org.openmrs.module.hospitalcore.util.PatientDashboardConstants;
 import org.openmrs.module.laboratory.LaboratoryService;
 import org.openmrs.module.laboratoryapp.util.LaboratoryTestUtil;
 import org.openmrs.module.laboratoryapp.util.LaboratoryUtil;
 import org.openmrs.module.laboratoryapp.util.TestResultModel;
+import org.openmrs.module.referenceapplication.ReferenceApplicationWebConstants;
 import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.fragment.FragmentConfiguration;
 import org.openmrs.ui.framework.fragment.FragmentModel;
 import org.openmrs.ui.framework.page.PageModel;
+import org.openmrs.ui.framework.page.PageRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,10 +30,14 @@ import java.util.*;
 public class PatientReportPageController {
     private static Logger logger = LoggerFactory.getLogger(PatientReportPageController.class);
     public void get(
+            UiSessionContext sessionContext,
             @RequestParam("patientId") Integer patientId,
             @RequestParam(value = "selectedDate", required = false) String dateStr,
             PageModel model,
-            UiUtils ui) {
+            UiUtils ui,
+            PageRequest pageRequest){
+        pageRequest.getSession().setAttribute(ReferenceApplicationWebConstants.SESSION_ATTRIBUTE_REDIRECT_URL,ui.thisUrl());
+        sessionContext.requireAuthentication();
         Patient patient = Context.getPatientService().getPatient(patientId);
 
         model.addAttribute("patient", patient);
