@@ -102,7 +102,9 @@
             </div>
         </td>
         <td>
-            ${test}
+            <div data-bind="if: (level && level.toUpperCase() === 'LEVEL_TEST')">
+                ${test}
+            </div>
         </td>
 
     </tr>
