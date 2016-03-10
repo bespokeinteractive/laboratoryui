@@ -12,6 +12,7 @@
 	
 	jq(function(){
 		jq(".lab-tabs").tabs();
+		getQueuePatients(false);
 		
 		jq("#refresh").on("click", function(){
 			if (jq('#queue').is(':visible')){
@@ -46,7 +47,11 @@
 			}
         });
 		
-		function getQueuePatients() {
+		function getQueuePatients(showToast) {
+			if (typeof showToast === 'undefined') {
+				showToast=true;
+			}
+			
 			var date = jq("#referred-date-field").val();
 			var searchQueueFor = jq("#search-queue-for").val();
 			var investigation = jq("#investigation").val();
@@ -58,8 +63,8 @@
 					"currentPage" : 1
 				}
 			).success(function(data) {
-				if (data.length === 0) {
-					jq().toastmessage('showErrorToast', "No match found!");
+				if (data.length === 0 && showToast) {
+					jq().toastmessage('showErrorToast', "No Records found!");
 				}
 				queueData.tests.removeAll();
 				jq.each(data, function(index, testInfo){
@@ -150,7 +155,7 @@
 					getResults();
 				}
 			}
-		}); 
+		});
 	});
 	
 	

@@ -128,18 +128,18 @@
 		jq("#reschedule-form #order").val(orderId);
 
 		jq.post('${ui.actionLink("laboratoryapp", "queue", "fetchSampleID")}',
-				{ 'orderId' : orderId },
-				function (data) {
-					if (data) {
+			{ 'orderId' : orderId },
+			function (data) {
+				if (data) {
 
-						defaultSampleId.val(data.defaultSampleId);
-						acceptDialog.dialog( "open" );
+					defaultSampleId.val(data.defaultSampleId);
+					acceptDialog.dialog( "open" );
 
-					} else{
-						jq().toastmessage('showErrorToast', data.error);
-					}
-				},
-				'json'
+				} else{
+					jq().toastmessage('showErrorToast', data.error);
+				}
+			},
+			'json'
 		);
 	}
 	function QueueData() {

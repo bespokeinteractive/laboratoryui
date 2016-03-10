@@ -102,6 +102,7 @@ public class ResultFragmentController {
 			patientInQueue.setBirthDate(patient.getBirthdate());
 			patientInQueue.setPatientIdentifier(patient.getPatientIdentifier().getIdentifier());
 			patientInQueue.setOpdConcept(selectedOPDConcept);
+			patientInQueue.setTriageDataId(patientQueueLog.getTriageDataId());
 			patientInQueue.setOpdConceptName(selectedOPDConcept.getName().getName());
 			if(null!=patient.getMiddleName())
 			{
