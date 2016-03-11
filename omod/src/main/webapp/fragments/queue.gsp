@@ -1,5 +1,3 @@
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.0/moment.js"></script>
-
 <script>
 	var queueData,
 		rescheduleDialog,
@@ -22,8 +20,6 @@
 	});
 
 	function acceptTest() {
-
-
 		jq.post('${ui.actionLink("laboratoryapp", "queue", "acceptLabTest")}',
 			{ 'orderId' : orderId.val(), 'confirmedSampleId': defaultSampleId.val()},
 			function (data) {
@@ -41,74 +37,58 @@
 			},
 			'json'
 		);
-		acceptDialog.dialog( "close" );
 	}
 
 	jq(function(){
-		acceptDialog = jq("#accept-form").dialog({
-			autoOpen: false,
-			height: 250,
-			width: 400,
-			modal: true,
-			buttons: {
-				Accept: acceptTest,
-				Cancel: function() {
-					acceptDialog.dialog( "close" );
+		acceptDialog = emr.setupConfirmationDialog({
+			selector: '#accept-form',
+			actions: {
+				confirm: function() {
+					acceptTest();
+					acceptDialog.close();
+				},
+				cancel: function() {
+					acceptDialog.close();
 				}
-			},
-			close: function() {
-				acceptForm[ 0 ].reset();
 			}
 		});
-
-		acceptForm = acceptDialog.find( "form" ).on( "submit", function( event ) {
-			event.preventDefault();
-			acceptTest(orderId.val());
-		});
+	
+	
 
 		ko.applyBindings(testDetails, jq("#reschedule-form")[0]);
 	});
 
-	jq(function(){	
-		rescheduleDialog = jq("#reschedule-form").dialog({
-			autoOpen: false,
-			height: 350,
-			width: 400,
-			modal: true,
-			buttons: {
-				Reschedule: saveSchedule,
-				Cancel: function() {
-					rescheduleDialog.dialog( "close" );
+	jq(function(){
+		rescheduleDialog = emr.setupConfirmationDialog({
+			selector: '#reschedule-form',
+			actions: {
+				confirm: function() {
+					saveQueueSchedule();
+					rescheduleDialog.close();
+				},
+				cancel: function() {
+					rescheduleDialog.close();
 				}
-			},
-			close: function() {
-				rescheduleForm[ 0 ].reset();
-				allFields.removeClass( "ui-state-error" );
 			}
-		});
-		
-		rescheduleForm = rescheduleDialog.find( "form" ).on( "submit", function( event ) {
-			event.preventDefault();
-			saveSchedule();
 		});
 
 		ko.applyBindings(testDetails, jq("#reschedule-form")[0]);
 
 	});
 
-	function saveSchedule() {
+	function saveQueueSchedule() {
 		jq.post('${ui.actionLink("laboratoryapp", "queue", "rescheduleTest")}',
 			{ "orderId" : orderId.val(), "rescheduledDate" : moment(scheduleDate.val()).format('DD/MM/YYYY') },
 			function (data) {
 				if (data.status === "fail") {
 					jq().toastmessage('showErrorToast', data.error);
-				} else {				
+				} else {
 					jq().toastmessage('showSuccessToast', data.message);
 					var rescheduledTest = ko.utils.arrayFirst(queueData.tests(), function(item) {
 						return item.orderId == orderId.val();
 					});
+					console.log(rescheduledTest);
 					queueData.tests.remove(rescheduledTest);
-					rescheduleDialog.dialog("close");
 				}
 			},
 			'json'
@@ -121,7 +101,7 @@
 			return item.orderId == orderId;
 		});
 		testDetails.details(details);
-		rescheduleDialog.dialog( "open" );
+		rescheduleDialog.show();
 	}
 
 	function accept(orderId) {
@@ -133,7 +113,7 @@
 				if (data) {
 
 					defaultSampleId.val(data.defaultSampleId);
-					acceptDialog.dialog( "open" );
+					acceptDialog.show();
 
 				} else{
 					jq().toastmessage('showErrorToast', data.error);
@@ -206,9 +186,8 @@
 			<th style="width: 60px">Gender</th>
 			<th style="width:30px">Age</th>
 			<th>Test</th>
-			<th>Accept</th>
 			<th style="width: 70px;">Sample ID</th>
-			<th style="width: 80px;">Reschedule</th>			
+			<th style="width: 80px;">Action</th>			
 		</tr>
 	</thead>
 	<tbody data-bind="foreach: tests">
@@ -219,47 +198,87 @@
 			<td data-bind="text: gender"></td>
 			<td data-bind="text: age"></td>
 			<td data-bind="text: test.name"></td>
-			<td data-bind="attr: { class : 'test-status-' + orderId }">
-				<span data-bind="if: status">Accepted</span>
-				<span data-bind="ifnot: status">
-					<a data-bind="attr: { href: 'javascript:accept(' + orderId + ')' }">
-						Accept
-					</a>
-				</span>
-			</td>
 			<td data-bind="attr: { class : 'test-sample-id-' + orderId }, text: sampleId"></td>
-			<div id="accept-form" title="Accept">
-				<form>
-					<fieldset>
-						<label>Sample ID</label>
-						<input type="text" id="defaultSampleId">
-						<input type="hidden" id="order_ID">
-						<p data-bind="text:test.name"></p>
-					</fieldset>
-				</form>
-			</div>
+			
 			<td>
-				<span data-bind="ifnot: status"> 
-					<a data-bind="attr: { href : 'javascript:reschedule(' + orderId + ')' }">Reschedule</a>
-				</span>
+				<center id="action-icons">
+					<span data-bind="if: status" class="accepted">Accepted</span>
+					<span data-bind="ifnot: status">
+						<a title="Accept" data-bind="attr: { href: 'javascript:accept(' + orderId + ')' }" ><i class=" icon-ok small"></i></a>
+					</span>
+					
+					<span data-bind="ifnot: status"> 
+						<a title="Reschedule" data-bind="attr: { href : 'javascript:reschedule(' + orderId + ')' }"><i class="icon-repeat small"></i></a>
+					</span>
+				</center>
+				
 			</td>
+			
+			
+			
 		</tr>
 
 
 	</tbody>
 </table>
 
-<div id="reschedule-form" title="Reschedule">
- 	<form>
-		<fieldset>
-			<p data-bind="text: 'Patient Name: ' + details().patientName"></p> 
-			<p data-bind="text: 'Test: ' + details().test.name"></p>
-			<p data-bind="text: 'Date: ' + details().startDate"></p>
-            		${ui.includeFragment("uicommons", "field/datetimepicker", [id: 'reschedule-date', label: 'Reschedule To', formFieldName: 'rescheduleDate', useTime: false, defaultToday: true])}
+<div id="accept-form" title="Accept" class="dialog">
+	<div class="dialog-header">
+      <i class="icon-ok"></i>
+      <h3>Accept Test</h3>
+    </div>
+	
+	<div class="dialog-content">
+		<form>
+			<label>Sample ID</label>
+			<input type="text" id="defaultSampleId">
+			<input type="hidden" id="order_ID">
+			<p data-bind="text:test.name"></p>
+		</form>
+		
+		<span class="button confirm right"> Confirm </span>
+        <span class="button cancel"> Cancel </span>
+	</div>
+	
+</div>
+
+<div id="reschedule-form" title="Reschedule" class="dialog">
+	<div class="dialog-header">
+      <i class="icon-repeat"></i>
+      <h3>Reschedule Tests</h3>
+    </div>
+	
+	<div class="dialog-content">
+		<form>
+			<p>
+				<div class="dialog-data">Patient Name:</div>
+				<div class="inline" data-bind="text: details().patientName"></div>
+			</p> 
+			
+			<p >
+				<div class="dialog-data">Test Name:</div>
+				<div class="inline" data-bind="text: details().test.name"></div>
+			</p>
+			
+			
+			<p>
+				<div class="dialog-data">Test Date:</div>
+				<div class="inline" data-bind="text: details().startDate"></div>
+			</p>
+			
+			<p>
+				<div class="dialog-data">Reschedule To:</div>
+				${ui.includeFragment("uicommons", "field/datetimepicker", [id: 'reschedule-date', label: 'Reschedule To', formFieldName: 'rescheduleDate', useTime: false, defaultToday: true, startToday: true])}
+			</p>
+					
+			
 			<input type="hidden" id="order" name="order" >
 
 			<!-- Allow form submission with keyboard without duplicating the dialog button -->
 			<input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
-		</fieldset>
-	</form>
+		</form>
+		
+		<span class="button confirm right"> Confirm </span>
+        <span class="button cancel"> Cancel </span>
+	</div>
 </div>

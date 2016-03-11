@@ -32,12 +32,15 @@
 		jq("#inline-tabs li").click(function() {
 			if (jq(this).attr("aria-controls") == "queue"){
 				jq('#refresh a').html('<i class="icon-refresh"></i> Get Patients');
+				getQueuePatients(false);
 			}
 			else if (jq(this).attr("aria-controls") == "worklist"){
 				jq('#refresh a').html('<i class="icon-refresh"></i> Get Worklist');
+				getWorklists(false);
 			}
 			else if (jq(this).attr("aria-controls") == "results"){
 				jq('#refresh a').html('<i class="icon-refresh"></i> Get Results');
+				getResults(false);
 			}
 			else if (jq(this).attr("aria-controls") == "status"){
 				jq('#refresh a').html('<i class="icon-refresh"></i> Get Functional Status');
@@ -73,7 +76,11 @@
 			});
 		}
 		
-		function getWorklists() {
+		function getWorklists(showToast) {
+			if (typeof showToast === 'undefined') {
+				showToast=true;
+			}
+			
 			var date = moment(jq('#accepted-date-field').val()).format('DD/MM/YYYY');
 			var searchWorklistFor = jq("#search-worklist-for").val();
 			var investigation = jq("#investigation-worklist").val();
@@ -85,8 +92,8 @@
 					"investigation" : investigation
 				}
 			).success(function(data) {
-				if (data.length === 0) {
-					jq().toastmessage('showErrorToast', "No match found!", true);
+				if (data.length === 0 && showToast) {
+					jq().toastmessage('showErrorToast', "No Records found!");
 				}
 				workList.items.removeAll();
 				jq.each(data, function(index, testInfo){
@@ -95,7 +102,13 @@
 			});
 		}
 		
-		function getResults(){
+		function getResults(showToast){
+			if (typeof showToast === 'undefined'){
+				showToast=true;
+			}
+			
+			console.log(showToast);
+			
 			var date = moment(jq('#accepted-date-edit-field').val()).format('DD/MM/YYYY');
             var searchResultsFor = jq("#search-results-for").val();
             var investigation = jq("#investigation-results").val();
@@ -107,8 +120,8 @@
 					"investigation" : investigation
 				}
             ).success(function(data) {
-				if (data.length === 0) {
-					jq().toastmessage('showErrorToast', "No match found!");
+				if (data.length === 0 && showToast) {
+					jq().toastmessage('showErrorToast', "No Records found!");
 				}
 				result.items.removeAll();
 				jq.each(data, function(index, testInfo){
@@ -243,6 +256,30 @@
 	}
 	.toast-item-image {
 		top: 25px;
+	}
+	.ui-widget-content a {
+		color: #007fff;
+	}
+	.accepted{
+		color: #f26522;
+	}
+	#modal-overlay {
+		background: #000 none repeat scroll 0 0;
+		opacity: 0.4 !important;
+	}
+	.dialog-data{
+		display: inline-block;
+		width: 120px;
+	}
+	.inline{
+		display: inline-block;
+	}
+	#reschedule-date label{
+		display: none;
+	}
+	#reschedule-date-display{
+		min-width: 1px;
+		width: 235px;
 	}
 </style>
 <header>
