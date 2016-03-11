@@ -96,6 +96,13 @@
 				<scope>provided</scope>
 			</dependency>
 
+			<dependency>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>referenceapplication-omod</artifactId>
+				<version>1.0.1</version>
+				<scope>provided</scope>
+			</dependency>
+
 			<!-- Begin OpenMRS core -->
 			
 			<dependency>

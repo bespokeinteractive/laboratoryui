@@ -8,12 +8,20 @@ import org.openmrs.Concept;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.hospitalcore.model.Lab;
 import org.openmrs.module.laboratory.LaboratoryService;
+import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.page.PageModel;
 import org.openmrs.module.appui.UiSessionContext;
+import org.openmrs.module.referenceapplication.ReferenceApplicationWebConstants;
+import org.openmrs.ui.framework.page.PageRequest;
+
 
 public class QueuePageController {
 
-	public void get(UiSessionContext sessionContext, PageModel model) {
+	public void get(UiSessionContext sessionContext,
+					PageModel model,
+					PageRequest pageRequest,
+					UiUtils ui) {
+		pageRequest.getSession().setAttribute(ReferenceApplicationWebConstants.SESSION_ATTRIBUTE_REDIRECT_URL,ui.thisUrl());
 		sessionContext.requireAuthentication();
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 		String dateStr = sdf.format(new Date());
