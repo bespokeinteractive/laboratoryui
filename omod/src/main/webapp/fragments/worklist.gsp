@@ -1,3 +1,196 @@
+<script>
+	var resultDialog, 
+		resultForm,
+		selectedTestDetails,
+		parameterOpts = { parameterOptions : ko.observableArray([]) };
+	
+	var reorderDialog, reorderForm;
+	var scheduleDate = jq("#reorder-date");
+	var orderId = jq("#order");
+	var details = { 'patientName' : 'Patient Name', 'startDate' : 'Start Date', 'test' : { 'name' : 'Test Name' } }; 
+	var testDetails = { details : ko.observable(details) }
+	
+	jq(function(){
+		ko.applyBindings(parameterOpts, jq("#result-form")[0]);
+		
+		resultDialog = emr.setupConfirmationDialog({
+			selector: '#result-form',
+			actions: {
+				confirm: function() {
+					saveResult();
+					resultDialog.close();
+				},
+				cancel: function() {
+					resultDialog.close();
+				}
+			}
+		});
+		
+		/*resultDialog = jq("#result-form").dialog({
+			autoOpen: false,
+			width: 600,
+			modal: true,
+			buttons: {
+				Save: saveResult,
+				Cancel: function() {
+					resultDialog.dialog( "close" );
+				}
+			},
+			close: function() {
+				resultForm[ 0 ].reset();
+				allFields.removeClass( "ui-state-error" );
+			}
+		});*/
+		
+		resultForm = jq("#result-form").find( "form" ).on( "submit", function( event ) {
+			event.preventDefault();
+			saveResult();
+		});
+	});
+	
+	function showResultForm(testDetail) {
+		selectedTestDetails = testDetail;
+		getResultTemplate(testDetail.testId);
+		resultForm.find("#test-id").val(testDetail.testId);
+		resultDialog.show();
+	}
+	
+	function getResultTemplate(testId) {
+		jq.getJSON('${ui.actionLink("laboratoryapp", "result", "getResultTemplate")}',
+			{ "testId" : testId }
+		).success(function(parameterOptions){
+			parameterOpts.parameterOptions.removeAll();
+			var details = ko.utils.arrayFirst(workList.items(), function(item) {
+				return item.testId == testId;
+			});
+			jq.each(parameterOptions, function(index, parameterOption) {
+				parameterOption['patientName'] = details.patientName;
+				parameterOption['testName'] = details.test.name;
+				parameterOption['startDate'] = details.startDate;
+				parameterOpts.parameterOptions.push(parameterOption);
+			});
+		});
+	}
+	
+	function saveResult(){
+		var dataString = resultForm.serialize();
+		jq.ajax({
+			type: "POST",
+			url: '${ui.actionLink("laboratoryapp", "result", "saveResult")}',
+			data: dataString,
+			dataType: "json",
+			success: function(data) {
+				if (data.status === "success") {
+					jq().toastmessage('showNoticeToast', data.message);
+					workList.items.remove(selectedTestDetails);
+					resultDialog.dialog("close");
+				}
+			}
+		});
+	}
+
+	jq(function(){	
+		reorderDialog = jq("#reorder-form").dialog({
+			autoOpen: false,
+			width: 350,
+			modal: true,
+			buttons: {
+				"Re-order": saveSchedule,
+				Cancel: function() {
+					reorderDialog.dialog( "close" );
+				}
+			},
+			close: function() {
+				reorderForm[ 0 ].reset();
+				allFields.removeClass( "ui-state-error" );
+			}
+		});
+		
+		reorderForm = reorderDialog.find( "form" ).on( "submit", function( event ) {
+			event.preventDefault();
+			saveSchedule();
+		});
+
+		ko.applyBindings(testDetails, jq("#reorder-form")[0]);
+
+	});
+
+	function reorder(orderId) {
+		jq("#reorder-form #order").val(orderId);
+		var details = ko.utils.arrayFirst(workList.items(), function(item) {
+			return item.orderId == orderId;
+		});
+		testDetails.details(details);
+		reorderDialog.dialog( "open" );
+	}
+
+	function saveSchedule() {
+		jq.post('${ui.actionLink("laboratoryapp", "queue", "rescheduleTest")}',
+			{ "orderId" : orderId.val(), "rescheduledDate" : moment(scheduleDate.val()).format('DD/MM/YYYY') },
+			function (data) {
+				if (data.status === "fail") {
+					jq().toastmessage('showErrorToast', data.error);
+				} else {				
+					jq().toastmessage('showSuccessToast', data.message);
+					var reorderedTest = ko.utils.arrayFirst(workList.items(), function(item) {
+						return item.orderId == orderId.val();
+					});
+					workList.items.remove(reorderedTest);
+					reorderDialog.dialog("close");
+				}
+			},
+			'json'
+		);
+	}
+	
+	function WorkList() {
+		self = this;
+		self.items = ko.observableArray([]);
+	}
+	var workList = new WorkList();
+	
+	jq(function(){
+		ko.applyBindings(workList, jq("#test-worklist")[0]);
+	});
+
+	jq(function(){
+		var worksheet = { items : ko.observableArray([]) };
+		ko.applyBindings(worksheet, jq("#worksheet")[0]);
+		jq("#worksheet").hide();
+		jq("#print-worklist").on("click", function() {
+			jq.getJSON('${ui.actionLink("laboratoryapp", "worksheet", "getWorksheet")}',
+				{ 
+					"date" : moment(jq('#accepted-date-field').val()).format('DD/MM/YYYY'),
+					"phrase" : jq("#search-worklist-for").val(),
+					"investigation" : jq("#investigation").val(),
+					"showResults" : jq("#include-result").is(":checked")
+				}
+			).success(function(data) {
+				worksheet.items.removeAll();
+				jq.each(data, function (index, item) {
+					worksheet.items.push(item);
+				});
+				printData();
+			});
+		});
+		
+		jq("#export-worklist").on("click", function() {
+			window.location = "/" + OPENMRS_CONTEXT_PATH + "/module/laboratory/download.form?" +
+				"date=" + moment(jq('#accepted-date-field').val()).format('DD/MM/YYYY') + "&phrase=" + jq("#search-worklist-for").val() +
+				"&investigation=" + jq("#investigation").val() +
+				"&showResults=" + jq("#include-result").is(":checked");
+		});
+	});
+
+	function printData() {
+		jq("#worksheet").print({
+				mediaPrint: false,
+				stylesheet: '${ui.resourceLink("referenceapplication","styles/referenceapplication.css")}',
+				iframe: true
+		});
+	}
+</script>
+
 <div>
 	<form>
 		<fieldset>
@@ -65,15 +258,14 @@
 <table id="test-worklist">
 	<thead>
 		<tr>
-			<th>Sample ID</th>	
+			<th style="width: 70px;">Sample ID</th>	
 			<th>Date</th>
 			<th>Patient ID</th>
 			<th>Name</th>
-			<th>Gender</th>
-			<th>Age</th>
+			<th style="width: 53px;">Gender</th>
+			<th style="width: 30px;">Age</th>
 			<th>Test</th>
-			<th>Results</th>
-			<th>Reorder</th>
+			<th style="width: 60px;">Action</th>
 		</tr>
 	</thead>
 	<tbody data-bind="foreach: items">
@@ -84,58 +276,94 @@
 			<td data-bind="text: patientName"></td>
 			<td data-bind="text: gender"></td>
 			<td>
-				<span data-bind="if: age < 1">Less than 1 year</span>
+				<span data-bind="if: age < 1">< 1</span>
 				<!-- ko if: age > 1 -->
-					<span data-bind="value: age"></span>
+					<span data-bind="text: age"></span>
 				<!-- /ko -->
 			</td>
 			<td data-bind="text: test.name"></td>
 			<td> 
-				<a data-bind="click: showResultForm, attr: { href : '#' }">Enter Result</a>
-			</td>
-			<td>
-				<a data-bind="attr: { href : 'javascript:reorder(' + orderId + ')' }">Re-order</a>
+				<a title="Enter Results" data-bind="click: showResultForm, attr: { href : '#' }"><i class="icon-list-ul small"></i></a>
+				<a title="Re-order Test" data-bind="attr: { href : 'javascript:reorder(' + orderId + ')' }"><i class="icon-share small"></i></a>
 			</td>
 		</tr>
 	</tbody>
 </table>
 
-<div id="result-form" title="Results">
-	<form>
-		<input type="hidden" name="wrap.testId" id="test-id" />
-		<div data-bind="if: parameterOptions()[0]">
-			<p data-bind="text: 'Patient Name: ' + parameterOptions()[0].patientName"></p> 
-			<p data-bind="text: 'Test: ' + parameterOptions()[0].testName"></p>
-			<p data-bind="text: 'Date: ' + parameterOptions()[0].startDate"></p>
-		</div>
-		<div data-bind="foreach: parameterOptions">
-			<input type="hidden" data-bind="attr: { 'name' : 'wrap.results[' + \$index() + '].conceptName' }, value: title" >
-			<div data-bind="if:type && type.toLowerCase() === 'select'">
-				<p class="margin-left left">
-					<label for="result-option" class="input-position-class" data-bind="text: title"></label>
-					<select id="result-option" 
-						data-bind="attr : { 'name' : 'wrap.results[' + \$index() + '].selectedOption' },
-							foreach: options">
-						<option data-bind="attr: { name : value, selected : (\$parent.defaultValue === value) }, text: label"></option>
-					</select>
+<div id="result-form" title="Results" class="dialog">
+	<div class="dialog-header">
+      <i class="icon-list-ul"></i>
+      <h3>Edit Results</h3>
+    </div>
+	
+	<div class="dialog-content">
+		<form>
+			<input type="hidden" name="wrap.testId" id="test-id" />
+			<div data-bind="if: parameterOptions()[0]">
+				<p>
+					<div class="dialog-data">Patient Name:</div>
+					<div class="inline" data-bind="text: parameterOptions()[0].patientName"></div>
+				</p>
+				
+				<p>
+					<div class="dialog-data">Test Name:</div>
+					<div class="inline" data-bind="text: parameterOptions()[0].testName"></div>
+				</p>
+				
+				<p>
+					<div class="dialog-data">Test Date:</div>
+					<div class="inline" data-bind="text: parameterOptions()[0].startDate"></div>
 				</p>
 			</div>
+			
+			<div data-bind="foreach: parameterOptions">
+				<input type="hidden" data-bind="attr: { 'name' : 'wrap.results[' + \$index() + '].conceptName' }, value: title" >
+				
+				<div data-bind="if:type && type.toLowerCase() === 'select'">
+					<p>
+						<label for="result-option" class="dialog-data input-position-class" data-bind="text: title"></label>
+						<select id="result-option" 
+							data-bind="attr : { 'name' : 'wrap.results[' + \$index() + '].selectedOption' },
+								foreach: options">
+							<option data-bind="attr: { name : value, selected : (\$parent.defaultValue === value) }, text: label"></option>
+						</select>
+					</p>
+				</div>
 
-
-			<div data-bind="if:type && type.toLowerCase() !== 'select'">
-				<p class="margin-left left">
-					<label for="result-text" data-bind="text: title"></label>
-					<input id="result-text" class="result-text" data-bind="attr : { 'type' : type, 'name' : 'wrap.results[' + \$index() + '].value', value : defaultValue }" >
-				</p>
+				<!--Test for radio or checkbox-->
+				<div data-bind="if:(type && type.toLowerCase() === 'radio') || (type && type.toLowerCase() === 'checkbox')">
+					<p id="rad">
+						<div class="dialog-data"></div>
+						<label for="result-text">
+							<input id="result-text" class="result-text" data-bind="attr : { 'type' : type, 'name' : 'wrap.results[' + \$index() + '].value', value : defaultValue }" >
+							<span data-bind="text: title"></span>
+						</label>
+					</p>
+				</div>
+				
+				<!--Other Input Types-->
+				<div data-bind="if:(type && type.toLowerCase() !== 'select') && (type && type.toLowerCase() !== 'radio') && (type && type.toLowerCase() !== 'checkbox')">
+					<p id="data">
+						<label for="result-text" data-bind="text: title" style="color:#ff3d3d;"></label>
+						<input id="result-text" class="result-text" data-bind="attr : { 'type' : type, 'name' : 'wrap.results[' + \$index() + '].value', value : defaultValue }" >
+					</p>
+				</div>
+				
+				<div data-bind="if: !type">
+					<p>
+						<label for="result-text" data-bind="text: title"></label>
+						<input class="result-text" type="text" data-bind="attr : {'name' : 'wrap.results[' + \$index() + '].value', value : defaultValue }" >
+					</p>
+				</div>
 			</div>
-			<div data-bind="if: !type">
-				<p class="margin-left left">
-					<label for="result-text" data-bind="text: title"></label>
-					<input class="result-text" type="text" data-bind="attr : {'name' : 'wrap.results[' + \$index() + '].value', value : defaultValue }" >
-				</p>
-			</div>
-		</div>
-	</form>
+		</form>
+		
+		<span class="button confirm right"> Confirm </span>
+        <span class="button cancel"> Cancel </span>
+	</div>
+	
+	
+	
 </div>
 
 <div id="reorder-form" title="Re-order">
@@ -153,152 +381,7 @@
 		</fieldset>
 	</form>
 </div>
-<script>
-	var resultDialog, 
-	resultForm,
-	selectedTestDetails,
-	parameterOpts = { parameterOptions : ko.observableArray([]) };
-	
-	jq(function(){
-		ko.applyBindings(parameterOpts, jq("#result-form")[0]);
-		
-		resultDialog = jq("#result-form").dialog({
-			autoOpen: false,
-			width: 600,
-			modal: true,
-			buttons: {
-				Save: saveResult,
-				Cancel: function() {
-					resultDialog.dialog( "close" );
-				}
-			},
-			close: function() {
-				resultForm[ 0 ].reset();
-				allFields.removeClass( "ui-state-error" );
-			}
-		});
-		
-		resultForm = resultDialog.find( "form" ).on( "submit", function( event ) {
-			event.preventDefault();
-			saveResult();
-		});
-	});
-	
-	function showResultForm(testDetail) {
-		selectedTestDetails = testDetail;
-		getResultTemplate(testDetail.testId);
-		resultForm.find("#test-id").val(testDetail.testId);
-		resultDialog.dialog( "open" );
-	}
-	
-	function getResultTemplate(testId) {
-		jq.getJSON('${ui.actionLink("laboratoryapp", "result", "getResultTemplate")}',
-			{ "testId" : testId }
-		).success(function(parameterOptions){
-			parameterOpts.parameterOptions.removeAll();
-			var details = ko.utils.arrayFirst(workList.items(), function(item) {
-				return item.testId == testId;
-			});
-			jq.each(parameterOptions, function(index, parameterOption) {
-				parameterOption['patientName'] = details.patientName;
-				parameterOption['testName'] = details.test.name;
-				parameterOption['startDate'] = details.startDate;
-				parameterOpts.parameterOptions.push(parameterOption);
-			});
-		});
-	}
-	
-	function saveResult(){
-		var dataString = resultForm.serialize();
-		jq.ajax({
-			type: "POST",
-			url: '${ui.actionLink("laboratoryapp", "result", "saveResult")}',
-			data: dataString,
-			dataType: "json",
-			success: function(data) {
-				if (data.status === "success") {
-					jq().toastmessage('showNoticeToast', data.message);
-					workList.items.remove(selectedTestDetails);
-					resultDialog.dialog("close");
-				}
-			}
-		});
-	}
-</script>
 
-<script>
-var reorderDialog, reorderForm;
-var scheduleDate = jq("#reorder-date");
-var orderId = jq("#order");
-var details = { 'patientName' : 'Patient Name', 'startDate' : 'Start Date', 'test' : { 'name' : 'Test Name' } }; 
-var testDetails = { details : ko.observable(details) }
-
-jq(function(){	
-	reorderDialog = jq("#reorder-form").dialog({
-		autoOpen: false,
-		width: 350,
-		modal: true,
-		buttons: {
-			"Re-order": saveSchedule,
-			Cancel: function() {
-				reorderDialog.dialog( "close" );
-			}
-		},
-		close: function() {
-			reorderForm[ 0 ].reset();
-			allFields.removeClass( "ui-state-error" );
-		}
-	});
-	
-	reorderForm = reorderDialog.find( "form" ).on( "submit", function( event ) {
-		event.preventDefault();
-		saveSchedule();
-	});
-
-	ko.applyBindings(testDetails, jq("#reorder-form")[0]);
-
-});
-
-function reorder(orderId) {
-	jq("#reorder-form #order").val(orderId);
-	var details = ko.utils.arrayFirst(workList.items(), function(item) {
-		return item.orderId == orderId;
-	});
-	testDetails.details(details);
-	reorderDialog.dialog( "open" );
-}
-
-function saveSchedule() {
-	jq.post('${ui.actionLink("laboratoryapp", "queue", "rescheduleTest")}',
-		{ "orderId" : orderId.val(), "rescheduledDate" : moment(scheduleDate.val()).format('DD/MM/YYYY') },
-		function (data) {
-			if (data.status === "fail") {
-				jq().toastmessage('showErrorToast', data.error);
-			} else {				
-				jq().toastmessage('showSuccessToast', data.message);
-				var reorderedTest = ko.utils.arrayFirst(workList.items(), function(item) {
-					return item.orderId == orderId.val();
-				});
-				workList.items.remove(reorderedTest);
-				reorderDialog.dialog("close");
-			}
-		},
-		'json'
-	);
-}
-</script>
-
-<script>
-	function WorkList() {
-		self = this;
-		self.items = ko.observableArray([]);
-	}
-	var workList = new WorkList();
-	
-	jq(function(){
-		ko.applyBindings(workList, jq("#test-worklist")[0]);
-	});
-</script>
 
 <!-- Worsheet -->
 <table id="worksheet">
@@ -327,44 +410,7 @@ function saveSchedule() {
 		</tr>
 	</tbody>
 </table>
-<script>
-jq(function(){
-	var worksheet = { items : ko.observableArray([]) };
-	ko.applyBindings(worksheet, jq("#worksheet")[0]);
-	jq("#worksheet").hide();
-	jq("#print-worklist").on("click", function() {
-		jq.getJSON('${ui.actionLink("laboratoryapp", "worksheet", "getWorksheet")}',
-			{ 
-				"date" : moment(jq('#accepted-date-field').val()).format('DD/MM/YYYY'),
-				"phrase" : jq("#search-worklist-for").val(),
-				"investigation" : jq("#investigation").val(),
-				"showResults" : jq("#include-result").is(":checked")
-			}
-		).success(function(data) {
-			worksheet.items.removeAll();
-			jq.each(data, function (index, item) {
-				worksheet.items.push(item);
-			});
-			printData();
-		});
-	});
-	
-	jq("#export-worklist").on("click", function() {
-		window.location = "/" + OPENMRS_CONTEXT_PATH + "/module/laboratory/download.form?" +
-			"date=" + moment(jq('#accepted-date-field').val()).format('DD/MM/YYYY') + "&phrase=" + jq("#search-worklist-for").val() +
-			"&investigation=" + jq("#investigation").val() +
-			"&showResults=" + jq("#include-result").is(":checked");
-	});
-});
 
-function printData() {
-	jq("#worksheet").print({
-            mediaPrint: false,
-            stylesheet: '${ui.resourceLink("referenceapplication","styles/referenceapplication.css")}',
-            iframe: true
-    });
-}
-</script>
 <!-- Worksheet -->
 <style>
 .margin-left {

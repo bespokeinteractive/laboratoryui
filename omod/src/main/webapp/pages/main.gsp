@@ -195,7 +195,8 @@
 	#accepted-date-edit label{
 		display: none;
 	}
-	form input[type="text"]{
+	form input[type="text"],
+	form input[type="number"]{
 		width: 92%;
 	}
 	form select{
@@ -270,6 +271,7 @@
 	.dialog-data{
 		display: inline-block;
 		width: 120px;
+		color: #028b7d;
 	}
 	.inline{
 		display: inline-block;
@@ -280,6 +282,16 @@
 	#reschedule-date-display{
 		min-width: 1px;
 		width: 235px;
+	}
+	.dialog{
+		display: none;
+	}
+	.dialog select {
+		display: inline;
+		width: 255px;
+	}
+	.dialog select option {
+		font-size: 1em;
 	}
 </style>
 <header>

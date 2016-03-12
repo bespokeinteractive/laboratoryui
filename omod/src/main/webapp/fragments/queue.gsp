@@ -52,9 +52,7 @@
 				}
 			}
 		});
-	
-	
-
+		
 		ko.applyBindings(testDetails, jq("#reschedule-form")[0]);
 	});
 
@@ -183,11 +181,11 @@
 			<th>Date</th>
 			<th>Patient ID</th>
 			<th>Name</th>
-			<th style="width: 60px">Gender</th>
-			<th style="width:30px">Age</th>
+			<th style="width: 53px">Gender</th>
+			<th style="width: 30px">Age</th>
 			<th>Test</th>
 			<th style="width: 70px;">Sample ID</th>
-			<th style="width: 80px;">Action</th>			
+			<th style="width: 60px;">Action</th>			
 		</tr>
 	</thead>
 	<tbody data-bind="foreach: tests">
@@ -198,13 +196,16 @@
 			<td data-bind="text: gender"></td>
 			<td data-bind="text: age"></td>
 			<td data-bind="text: test.name"></td>
-			<td data-bind="attr: { class : 'test-sample-id-' + orderId }, text: sampleId"></td>
+			<td data-bind="attr: { class : 'test-sample-id-' + orderId }">
+				<span data-bind="text: sampleId"></span>
+				<span data-bind="ifnot: sampleId">&nbsp; &nbsp;&#8212;</span>
+			</td>
 			
 			<td>
 				<center id="action-icons">
 					<span data-bind="if: status" class="accepted">Accepted</span>
 					<span data-bind="ifnot: status">
-						<a title="Accept" data-bind="attr: { href: 'javascript:accept(' + orderId + ')' }" ><i class=" icon-ok small"></i></a>
+						<a title="Accept" data-bind="attr: { href: 'javascript:accept(' + orderId + ')' }" ><i class="icon-ok small"></i></a>
 					</span>
 					
 					<span data-bind="ifnot: status"> 
