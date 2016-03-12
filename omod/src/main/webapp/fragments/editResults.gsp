@@ -153,35 +153,28 @@
 
 <table id="test-results">
     <thead>
-    <th>Sample ID</th>
-    <th>Date</th>
-    <th>Patient ID</th>
-    <th>Name</th>
-    <th>Gender</th>
-    <th>Age</th>
-    <th>Test</th>
-    <th>Results</th>
-    <th>Reports</th>
+		<th>Sample ID</th>
+		<th>Ordered</th>
+		<th>Patient ID</th>
+		<th>Name</th>
+		<th style="width: 53px;">Gender</th>
+		<th style="width: 30px;">Age</th>
+		<th>Test</th>
+		<th style="width: 60px;">Action</th>
     </thead>
+	
     <tbody data-bind="foreach: items">
-    <td data-bind="text: sampleId"></td>
-    <td data-bind="text: startDate"></td>
-    <td data-bind="text: patientIdentifier"></td>
-    <td data-bind="text: patientName"></td>
-    <td data-bind="text: gender"></td>
-    <td>
-        <span data-bind="if: age < 1">Less than 1 year</span>
-        <!-- ko if: age > 1 -->
-        <span data-bind="value: age"></span>
-        <!-- /ko -->
-    </td>
-    <td data-bind="text: test.name"></td>
-    <td>
-        <a data-bind="attr: { href : 'javascript:showEditResultForm(' + testId + ')' }">Edit Result</a>
-    </td>
-    <td>
-        <a data-bind="attr: { href : 'javascript:loadPatientReport(' + patientId + ')' }">Report</a>
-    </td>
+		<td data-bind="text: sampleId"></td>
+		<td data-bind="text: startDate"></td>
+		<td data-bind="text: patientIdentifier"></td>
+		<td data-bind="text: patientName"></td>
+		<td data-bind="text: gender"></td>
+		<td data-bind="text: age"></td>
+		<td data-bind="text: test.name"></td>
+		<td>
+			<a title="Edit Result" data-bind="attr: { href : 'javascript:showEditResultForm(' + testId + ')' }"><i class="icon-file-alt small"></i></a>
+			<a title="View Report" data-bind="attr: { href : 'javascript:loadPatientReport(' + patientId + ')' }"><i class="icon-bar-chart small"></i></a>
+		</td>
     </tbody>
 </table>
 
