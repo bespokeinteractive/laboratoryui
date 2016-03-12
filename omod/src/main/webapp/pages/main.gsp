@@ -13,6 +13,8 @@
 	jq(function(){
 		jq(".lab-tabs").tabs();
 		getQueuePatients(false);
+		getResults(false);
+		getWorklists(false);
 		
 		jq("#refresh").on("click", function(){
 			if (jq('#queue').is(':visible')){

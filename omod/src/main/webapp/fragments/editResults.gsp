@@ -1,13 +1,8 @@
 <% ui.includeJavascript("laboratoryapp", "jQuery.print.js") %>
 
 <script>
-    
-	
     jq(function(){
         jq('#date').datepicker("option", "dateFormat", "dd/mm/yy");
-
-        
-		
     });
 	
     var editResultsDialog,
@@ -29,21 +24,6 @@
 				}
 			}
 		});
-		
-        /*editResultsDialog = jq("#edit-result-form").dialog({
-            autoOpen: false,
-            modal: true,
-            width: 350,
-            buttons: {
-                Save: saveEditResult,
-                Cancel: function() {
-                    editResultsDialog.dialog( "close" );
-                }
-            },
-            close: function() {
-                editResultsForm[0].reset();
-            }
-        });*/
 
         editResultsForm = jq("#edit-result-form").find( "form" ).on( "submit", function( event ) {
             event.preventDefault();
@@ -61,17 +41,17 @@
         jq.getJSON('${ui.actionLink("laboratoryapp", "result", "getResultTemplate")}',
                 { "testId" : testId }
         ).success(function(editResultsParameterOptions){
-                    editResultsParameterOpts.editResultsParameterOptions.removeAll();
-                    var details = ko.utils.arrayFirst(result.items(), function(item) {
-                        return item.testId == testId;
-                    });
-                    jq.each(editResultsParameterOptions, function(index, editResultsParameterOption) {
-                        editResultsParameterOption['patientName'] = details.patientName;
-                        editResultsParameterOption['testName'] = details.test.name;
-                        editResultsParameterOption['startDate'] = details.startDate;
-                        editResultsParameterOpts.editResultsParameterOptions.push(editResultsParameterOption);
-                    });
-                });
+			editResultsParameterOpts.editResultsParameterOptions.removeAll();
+			var details = ko.utils.arrayFirst(result.items(), function(item) {
+				return item.testId == testId;
+			});
+			jq.each(editResultsParameterOptions, function(index, editResultsParameterOption) {
+				editResultsParameterOption['patientName'] = details.patientName;
+				editResultsParameterOption['testName'] = details.test.name;
+				editResultsParameterOption['startDate'] = details.startDate;
+				editResultsParameterOpts.editResultsParameterOptions.push(editResultsParameterOption);
+			});
+		});
     }
 
     function saveEditResult(){
@@ -137,7 +117,7 @@
 				
 				<div class="col4 last">
 					<select name="investigation" id="investigation-results">
-						<option value="0">Select an investigation</option>
+						<option value="0">ALL INVESTIGATIONS</option>
 						<% investigations.each { investigation -> %>
 						<option value="${investigation.id}">${investigation.name.name}</option>
 						<% } %>

@@ -6,6 +6,7 @@ import org.openmrs.module.appui.UiSessionContext;
 import org.openmrs.module.hospitalcore.model.LabTest;
 import org.openmrs.module.hospitalcore.util.PatientDashboardConstants;
 import org.openmrs.module.laboratory.LaboratoryService;
+import org.openmrs.module.hospitalcore.HospitalCoreService;
 import org.openmrs.module.laboratoryapp.util.LaboratoryTestUtil;
 import org.openmrs.module.laboratoryapp.util.LaboratoryUtil;
 import org.openmrs.module.laboratoryapp.util.TestResultModel;
@@ -19,6 +20,7 @@ import org.openmrs.ui.framework.page.PageRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.apache.commons.lang.StringUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -39,12 +41,25 @@ public class PatientReportPageController {
         pageRequest.getSession().setAttribute(ReferenceApplicationWebConstants.SESSION_ATTRIBUTE_REDIRECT_URL,ui.thisUrl());
         sessionContext.requireAuthentication();
         Patient patient = Context.getPatientService().getPatient(patientId);
+        HospitalCoreService hcs = Context.getService(HospitalCoreService.class);
 
         model.addAttribute("patient", patient);
         model.addAttribute("patientIdentifier", patient.getPatientIdentifier());
         model.addAttribute("age", patient.getAge());
         model.addAttribute("gender" , patient.getGender());
         model.addAttribute("name", patient.getNames());
+        model.addAttribute("category", patient.getAttribute(14));
+        model.addAttribute("previousVisit",hcs.getLastVisitTime(patient));
+
+        if (patient.getAttribute(43) == null){
+            model.addAttribute("fileNumber", "");
+        }
+        else if (StringUtils.isNotBlank(patient.getAttribute(43).getValue())){
+            model.addAttribute("fileNumber", "(File: "+patient.getAttribute(43)+")");
+        }
+        else {
+            model.addAttribute("fileNumber", "");
+        }
 
         LaboratoryService ls = Context.getService(LaboratoryService.class);
 
