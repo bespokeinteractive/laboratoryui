@@ -312,7 +312,7 @@
 
 				<!--Test for radio or checkbox-->
 				<div data-bind="if:(type && type.toLowerCase() === 'radio') || (type && type.toLowerCase() === 'checkbox')">
-					<p id="rad">
+					<p>
 						<div class="dialog-data"></div>
 						<label for="result-text">
 							<input id="result-text" class="result-text" data-bind="attr : { 'type' : type, 'name' : 'wrap.results[' + \$index() + '].value', value : defaultValue }" >

@@ -16,8 +16,21 @@
 
     jq(function(){
         ko.applyBindings(editResultsParameterOpts, jq("#edit-result-form")[0]);
-
-        editResultsDialog = jq("#edit-result-form").dialog({
+		
+		editResultsDialog = emr.setupConfirmationDialog({
+			selector: '#edit-result-form',
+			actions: {
+				confirm: function() {
+					saveEditResult();
+					editResultsDialog.close();
+				},
+				cancel: function() {
+					editResultsDialog.close();
+				}
+			}
+		});
+		
+        /*editResultsDialog = jq("#edit-result-form").dialog({
             autoOpen: false,
             modal: true,
             width: 350,
@@ -30,9 +43,9 @@
             close: function() {
                 editResultsForm[0].reset();
             }
-        });
+        });*/
 
-        editResultsForm = editResultsDialog.find( "form" ).on( "submit", function( event ) {
+        editResultsForm = jq("#edit-result-form").find( "form" ).on( "submit", function( event ) {
             event.preventDefault();
             saveEditResult();
         });
@@ -41,7 +54,7 @@
     function showEditResultForm(testId) {
         getEditResultTempLate(testId);
         editResultsForm.find("#edit-result-id").val(testId);
-        editResultsDialog.dialog( "open" );
+        editResultsDialog.show();
     }
 
     function getEditResultTempLate(testId) {
@@ -70,9 +83,12 @@
             dataType: "json",
             success: function(data) {
                 if (data.status === "success") {
-                    jq().toastmessage('showNoticeToast', data.message);
+                    jq().toastmessage('showSuccessToast', data.message);
                     editResultsDialog.dialog("close");
                 }
+				else {
+					jq().toastmessage('showErrorToast', data.error);
+				}
             }
         });
     }
@@ -169,37 +185,77 @@
     </tbody>
 </table>
 
-<div id="edit-result-form" title="Results">
-    <form>
-        <fieldset>
-            <input type="hidden" name="wrap.testId" id="edit-result-id" />
-            <div data-bind="foreach: editResultsParameterOptions">
-                <input type="hidden" data-bind="attr: { 'name' : 'wrap.results[' + \$index() + '].conceptName' }, value: title" >
-                <p data-bind="text: 'Patient Name: ' + patientName"></p>
-                <p data-bind="text: 'Test: ' + testName"></p>
-                <p data-bind="text: 'Date: ' + startDate"></p>
-                <div data-bind="if: type && type.toLowerCase() === 'select'">
-                    <label for="resultr-option" class="input-position-class left" data-bind="text: title"></label>
-                    <select id="resultr-option"
-                            data-bind="attr : { 'name' : 'wrap.results[' + \$index() + '].selectedOption' },
-							foreach: options">
-                        <option data-bind="attr: { name : value, selected : (\$parent.defaultValue === value) }, text: label"></option>
-                    </select>
-                </div>
-
-                <div data-bind="if: !type">
-                    <label for="result-text" data-bind="text: title"></label>
-                    <input id="result-text" class="result-text" type="text" data-bind="attr : { 'name' : 'wrap.results[' + \$index() + '].value' }" >
-                </div>
-                <div data-bind="if: type && type.toLowerCase() !== 'select'">
-                    <p class="margin-left left">
-                        <label for="result-text" data-bind="text: title"></label>
-                        <input class="result-text" data-bind="attr : { 'type' : type, 'name' : 'wrap.results[' + \$index() + '].value', value : defaultValue }" >
-                    </p>
-                </div>
-            </div>
-        </fieldset>
-    </form>
+<div id="edit-result-form" title="Results" class="dialog">
+	<div class="dialog-header">
+      <i class="icon-edit"></i>
+      <h3>Edit Results</h3>
+    </div>
+	
+	<div class="dialog-content">
+		<form>
+			<input type="hidden" name="wrap.testId" id="edit-result-id" />
+			
+			<div data-bind="foreach: editResultsParameterOptions">
+				<input type="hidden" data-bind="attr: { 'name' : 'wrap.results[' + \$index() + '].conceptName' }, value: title" >
+								
+				<p>
+					<div class="dialog-data">Patient Name:</div>
+					<div class="inline" data-bind="text: patientName"></div>
+				</p>
+				
+				<p>
+					<div class="dialog-data">Test Name:</div>
+					<div class="inline" data-bind="text: testName"></div>
+				</p>
+				
+				<p>
+					<div class="dialog-data">Patient Name:</div>
+					<div class="inline" data-bind="text: startDate"></div>
+				</p>
+				
+				
+				<div data-bind="if: type && type.toLowerCase() === 'select'">
+					<p>
+						<label for="resultr-option" class="dialog-data input-position-class left" data-bind="text: title"></label>
+						<select id="resultr-option"
+								data-bind="attr : { 'name' : 'wrap.results[' + \$index() + '].selectedOption' },
+								foreach: options">
+							<option data-bind="attr: { name : value, selected : (\$parent.defaultValue === value) }, text: label"></option>
+						</select>
+					</p>
+				</div>
+				
+				<!--Test for radio or checkbox-->
+				<div data-bind="if:(type && type.toLowerCase() === 'radio') || (type && type.toLowerCase() === 'checkbox')">
+					<p>
+						<div class="dialog-data"></div>
+						<label for="result-text">
+							<input id="result-text" class="result-text" data-bind="attr : { 'type' : type, 'name' : 'wrap.results[' + \$index() + '].value', value : defaultValue }" >
+							<span data-bind="text: title"></span>
+						</label>
+					</p>
+				</div>
+				
+				<!--Other Inputs-->
+				<div data-bind="if:(type && type.toLowerCase() !== 'select') && (type && type.toLowerCase() !== 'radio') && (type && type.toLowerCase() !== 'checkbox')">
+					<p>
+						<label for="result-text" data-bind="text: title" style="color:#ff3d3d;"></label>
+						<input class="result-text" data-bind="attr : { 'type' : type, 'name' : 'wrap.results[' + \$index() + '].value', value : defaultValue }" >
+					</p>
+				</div>
+				
+				<div data-bind="if: !type">
+					<label for="result-text" data-bind="text: title"></label>
+					<input id="result-text" class="result-text" type="text" data-bind="attr : { 'name' : 'wrap.results[' + \$index() + '].value' }" >
+				</div>
+			</div>
+		</form>
+		
+		<span class="button confirm right"> Save Results </span>
+        <span class="button cancel"> Cancel </span>
+	</div>
+	
+    
 </div>
 
 
