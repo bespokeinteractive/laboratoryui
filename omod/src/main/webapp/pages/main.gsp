@@ -1,4 +1,4 @@
-<% 
+ <% 
 	ui.decorateWith("appui", "standardEmrPage", [title: "Laboratory Dashboard"])
 	ui.includeCss("registration", "onepcssgrid.css")
 	
@@ -276,10 +276,12 @@
 	.inline{
 		display: inline-block;
 	}
-	#reschedule-date label{
+	#reschedule-date label,
+	#reorder-date label{
 		display: none;
 	}
-	#reschedule-date-display{
+	#reschedule-date-display,
+	#reorder-date-display{
 		min-width: 1px;
 		width: 235px;
 	}

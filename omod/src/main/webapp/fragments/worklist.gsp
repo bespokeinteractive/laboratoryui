@@ -26,26 +26,33 @@
 			}
 		});
 		
-		/*resultDialog = jq("#result-form").dialog({
-			autoOpen: false,
-			width: 600,
-			modal: true,
-			buttons: {
-				Save: saveResult,
-				Cancel: function() {
-					resultDialog.dialog( "close" );
-				}
-			},
-			close: function() {
-				resultForm[ 0 ].reset();
-				allFields.removeClass( "ui-state-error" );
-			}
-		});*/
-		
 		resultForm = jq("#result-form").find( "form" ).on( "submit", function( event ) {
 			event.preventDefault();
 			saveResult();
 		});
+	});
+	
+	jq(function(){
+		reorderDialog = emr.setupConfirmationDialog({
+			selector: '#reorder-form',
+			actions: {
+				confirm: function() {
+					saveSchedule();
+					reorderDialog.close();
+				},
+				cancel: function() {
+					reorderDialog.close();
+				}
+			}
+		});
+		
+		reorderForm = jq("#reorder-form").find( "form" ).on( "submit", function( event ) {
+			event.preventDefault();
+			saveSchedule();
+		});
+
+		ko.applyBindings(testDetails, jq("#reorder-form")[0]);
+
 	});
 	
 	function showResultForm(testDetail) {
@@ -89,44 +96,18 @@
 		});
 	}
 
-	jq(function(){	
-		reorderDialog = jq("#reorder-form").dialog({
-			autoOpen: false,
-			width: 350,
-			modal: true,
-			buttons: {
-				"Re-order": saveSchedule,
-				Cancel: function() {
-					reorderDialog.dialog( "close" );
-				}
-			},
-			close: function() {
-				reorderForm[ 0 ].reset();
-				allFields.removeClass( "ui-state-error" );
-			}
-		});
-		
-		reorderForm = reorderDialog.find( "form" ).on( "submit", function( event ) {
-			event.preventDefault();
-			saveSchedule();
-		});
-
-		ko.applyBindings(testDetails, jq("#reorder-form")[0]);
-
-	});
-
 	function reorder(orderId) {
 		jq("#reorder-form #order").val(orderId);
 		var details = ko.utils.arrayFirst(workList.items(), function(item) {
 			return item.orderId == orderId;
 		});
 		testDetails.details(details);
-		reorderDialog.dialog( "open" );
+		reorderDialog.show();
 	}
 
 	function saveSchedule() {
 		jq.post('${ui.actionLink("laboratoryapp", "queue", "rescheduleTest")}',
-			{ "orderId" : orderId.val(), "rescheduledDate" : moment(scheduleDate.val()).format('DD/MM/YYYY') },
+			{ "orderId" : orderId.val(), "rescheduledDate" : moment(jq("#reorder-date-field").val()).format('DD/MM/YYYY') },
 			function (data) {
 				if (data.status === "fail") {
 					jq().toastmessage('showErrorToast', data.error);
@@ -136,7 +117,6 @@
 						return item.orderId == orderId.val();
 					});
 					workList.items.remove(reorderedTest);
-					reorderDialog.dialog("close");
 				}
 			},
 			'json'
@@ -366,20 +346,43 @@
 	
 </div>
 
-<div id="reorder-form" title="Re-order">
- 	<form>
-		<fieldset>
-			<p data-bind="text: 'Patient Name: ' + details().patientName"></p> 
-			<p data-bind="text: 'Test: ' + details().test.name"></p>
-			<p data-bind="text: 'Date: ' + details().startDate"></p>
-			<label for="name">Reorder Date</label>
-			<input type="date" name="reorderDate" id="reorder-date" class="text ui-widget-content ui-corner-all">
-			<input type="hidden" id="order" name="order" >
+<div id="reorder-form" title="Re-order" class="dialog">
+	<div class="dialog-header">
+      <i class="icon-share"></i>
+      <h3>Re-order Test Results</h3>
+    </div>
+	
+	<div class="dialog-content">
+		<form>
+			<p>
+				<div class="dialog-data">Patient Name:</div>
+				<div class="inline" data-bind="text: details().patientName"></div>
+			</p>
+			
+			<p>
+				<div class="dialog-data">Test Name:</div>
+				<div class="inline" data-bind="text: details().test.name"></div>
+			</p>
+			
+			<p>
+				<div class="dialog-data">Test Date:</div>
+				<div class="inline" data-bind="text: details().startDate"></div>
+			</p>
+			
+			<p>
+				<label for="reorder-date-display" class="dialog-data">Reorder Date:</label>
+				${ui.includeFragment("uicommons", "field/datetimepicker", [id: 'reorder-date', label: 'Reschedule To', formFieldName: 'rescheduleDate', useTime: false, defaultToday: true, startToday: true])}		
+				<input type="hidden" id="order" name="order" >
+			</p>
 
 			<!-- Allow form submission with keyboard without duplicating the dialog button -->
 			<input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
-		</fieldset>
-	</form>
+		</form>
+		
+		<span class="button confirm right"> Re-order </span>
+        <span class="button cancel"> Cancel </span>
+	</div>
+ 	
 </div>
 
 
