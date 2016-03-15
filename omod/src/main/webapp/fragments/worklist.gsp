@@ -6,11 +6,12 @@
 	
 	var reorderDialog, reorderForm;
 	var scheduleDate = jq("#reorder-date");
-	var orderId = jq("#order");
+	var orderIdd;
 	var details = { 'patientName' : 'Patient Name', 'startDate' : 'Start Date', 'test' : { 'name' : 'Test Name' } }; 
 	var testDetails = { details : ko.observable(details) }
 	
 	jq(function(){
+		orderIdd = jq("#order");
 		ko.applyBindings(parameterOpts, jq("#result-form")[0]);
 		
 		resultDialog = emr.setupConfirmationDialog({
@@ -107,14 +108,14 @@
 
 	function saveSchedule() {
 		jq.post('${ui.actionLink("laboratoryapp", "queue", "rescheduleTest")}',
-			{ "orderId" : orderId.val(), "rescheduledDate" : moment(jq("#reorder-date-field").val()).format('DD/MM/YYYY') },
+			{ "orderId" : orderIdd.val(), "rescheduledDate" : moment(jq("#reorder-date-field").val()).format('DD/MM/YYYY') },
 			function (data) {
 				if (data.status === "fail") {
 					jq().toastmessage('showErrorToast', data.error);
 				} else {				
 					jq().toastmessage('showSuccessToast', data.message);
 					var reorderedTest = ko.utils.arrayFirst(workList.items(), function(item) {
-						return item.orderId == orderId.val();
+						return item.orderId == orderIdd.val();
 					});
 					workList.items.remove(reorderedTest);
 				}
