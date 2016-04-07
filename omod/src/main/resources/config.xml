@@ -40,6 +40,10 @@
 		<file>messages_es.properties</file>
 	</messages>
 	<!-- /Internationalization -->
+	<privilege>
+		<name>App: laboratoryapp</name>
+		<description>Able to access the laboratory app</description>
+	</privilege>
 	
 	<!-- Required Modules -->
 	<require_modules>
