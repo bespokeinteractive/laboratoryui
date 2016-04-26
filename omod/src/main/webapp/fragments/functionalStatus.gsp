@@ -50,7 +50,7 @@
                             if (data.status === "fail") {
                                 jq().toastmessage('showErrorToast', data.error);
                             } else {
-                                jq().toastmessage('showSuccessToast', data.message);
+                                jq().toastmessage('showSuccessToast', "saved");
 
                             }
                         },
