@@ -85,7 +85,6 @@
 					var rescheduledTest = ko.utils.arrayFirst(queueData.tests(), function(item) {
 						return item.orderId == orderId.val();
 					});
-					console.log(rescheduledTest);
 					queueData.tests.remove(rescheduledTest);
 				}
 			},

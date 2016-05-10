@@ -109,8 +109,6 @@
 				showToast=true;
 			}
 			
-			console.log(showToast);
-			
 			var date = moment(jq('#accepted-date-edit-field').val()).format('DD/MM/YYYY');
             var searchResultsFor = jq("#search-results-for").val();
             var investigation = jq("#investigation-results").val();
