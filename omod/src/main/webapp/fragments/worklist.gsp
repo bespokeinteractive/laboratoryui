@@ -60,7 +60,7 @@
 		selectedTestDetails = testDetail;
 		getResultTemplate(testDetail.testId);
 		resultForm.find("#test-id").val(testDetail.testId);
-		resultDialog.show();
+		
 	}
 	
 	function getResultTemplate(testId) {
@@ -77,7 +77,10 @@
 				parameterOption['startDate'] = details.startDate;
 				parameterOpts.parameterOptions.push(parameterOption);
 			});
+			
+			resultDialog.show();
 		});
+		
 	}
 	
 	function saveResult(){
