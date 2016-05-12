@@ -159,10 +159,24 @@
 		});
 		
 		jq("#export-worklist").on("click", function() {
-			window.location = "/" + OPENMRS_CONTEXT_PATH + "/module/laboratory/download.form?" +
-				"date=" + moment(jq('#accepted-date-field').val()).format('DD/MM/YYYY') + "&phrase=" + jq("#search-worklist-for").val() +
-				"&investigation=" + jq("#investigation").val() +
-				"&showResults=" + jq("#include-result").is(":checked");
+			var downloadLink = 
+				emr.pageLink("laboratoryapp", "reportExport", 
+					{
+						"worklistDate" : 
+							moment(jq('#accepted-date-field').val()).format('DD/MM/YYYY'),
+						"phrase": jq("#search-worklist-for").val(),
+						"investigation": jq("#investigation-worklist").val(),
+						"includeResults": jq("#include-result").is(":checked")
+					}
+				);
+			var win = window.open(downloadLink, '_blank');
+			if(win){
+				//Browser has allowed it to be opened
+				win.focus();
+			}else{
+				//Broswer has blocked it
+				alert('Please allow popups for this site');
+			}
 		});
 	});
 

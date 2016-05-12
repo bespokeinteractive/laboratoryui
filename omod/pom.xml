@@ -107,6 +107,10 @@
 		
 		<!-- End OpenMRS core -->
 
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
