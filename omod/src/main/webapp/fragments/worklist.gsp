@@ -140,7 +140,6 @@
 	jq(function(){
 		var worksheet = { items : ko.observableArray([]) };
 		ko.applyBindings(worksheet, jq("#worksheet")[0]);
-		jq("#worksheet").hide();
 		jq("#print-worklist").on("click", function() {
 			jq.getJSON('${ui.actionLink("laboratoryapp", "worksheet", "getWorksheet")}',
 				{ 
@@ -182,6 +181,7 @@
 
 	function printData() {
 		jq("#worksheet").print({
+				globalStyles: false,
 				mediaPrint: false,
 				stylesheet: '${ui.resourceLink("referenceapplication","styles/referenceapplication.css")}',
 				iframe: true
@@ -407,16 +407,23 @@
 <!-- Worsheet -->
 <table id="worksheet">
 	<thead>
-		<th>Order Date</th>
-		<th>Patient Identifier</th>
-		<th>Name</th>
-		<th>Age</th>
-		<th>Gender</th>
-		<th>Sample Id</th>
-		<th>Lab</th>
-		<th>Test</th>
-		<th>Result</th>
+		<tr>
+			<th>Order Date</th>
+			<th>Patient Identifier</th>
+			<th>Name</th>
+			<th>Age</th>
+			<th>Gender</th>
+			<th>Sample Id</th>
+			<th>Lab</th>
+			<th>Test</th>
+			<th>Result</th>
+		</tr>
 	</thead>
+	<tbody data-bind="if: items().length == 0">
+		<tr>
+			<td colspan="9">No processed/pending test</td>
+		</tr>
+	</tbody>
 	<tbody data-bind="foreach: items">
 		<tr>
 			<td data-bind="text: startDate"></td>
@@ -436,5 +443,8 @@
 <style>
 .margin-left {
 	margin-left: 10px;
+}
+#worksheet {
+	display: none;
 }
 </style>
