@@ -52,7 +52,7 @@ public class ReportExportPageController {
 			}
 			List<LabTest> laboratoryTests = laboratoryService.getAllLaboratoryTestsByDate(worklistDate, phrase, allowableTests);
 			List<TestModel> formattedLaboratoyTests = LaboratoryUtil.generateModelsForWorksheet(laboratoryTests, testTreeMap, includeResults);;
-			String filename = "Lab Worklist as of " + ui.formatDatePretty(worklistDate) + ".xls";
+			String filename = "Lab Worklist for " + ui.formatDatePretty(worklistDate) + ".xls";
 			String contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 			//String contentType = "application/vnd.ms-excel";
 			return new FileDownload(filename, contentType, buildExcelDocument(formattedLaboratoyTests));
