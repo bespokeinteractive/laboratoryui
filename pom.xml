@@ -72,14 +72,14 @@
 			<dependency>
 				<groupId>org.openmrs.module</groupId>
 				<artifactId>hospitalcore-api</artifactId>
-				<version>1.5.1</version>
+				<version>1.5.3-SNAPSHOT</version>
 				<scope>provided</scope>
 			</dependency>
 			
 			<dependency>
 				<groupId>org.openmrs.module</groupId>
 				<artifactId>laboratory-api</artifactId>
-				<version>0.6.0</version>
+				<version>0.6.2-SNAPSHOT</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>

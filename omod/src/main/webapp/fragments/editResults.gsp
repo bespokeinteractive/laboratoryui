@@ -75,7 +75,7 @@
 
     function loadPatientReport(patientId){
         queryparamenters = "?patientId=" + patientId + '&selectedDate=' + editResultsDate;
-        window.location.replace('${ui.pageLink("laboratoryapp", "patientReport")}'+queryparamenters);
+        window.location = '${ui.pageLink("laboratoryapp", "patientReport")}'+queryparamenters;
     }
     function Result() {
         self = this;
