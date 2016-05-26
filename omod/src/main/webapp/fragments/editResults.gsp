@@ -47,7 +47,12 @@
 			});
 			jq.each(editResultsParameterOptions, function(index, editResultsParameterOption) {
 				editResultsParameterOption['patientName'] = details.patientName;
-				editResultsParameterOption['testName'] = details.test.name;
+				if(details.test.name === "HAEMOGLOBIN"){
+					editResultsParameterOption['testName'] = details.test.name + " (g/dl)"
+					}
+				else{
+					editResultsParameterOption['testName'] = details.test.name;
+					}
 				editResultsParameterOption['startDate'] = details.startDate;
 				editResultsParameterOpts.editResultsParameterOptions.push(editResultsParameterOption);
 			});
@@ -217,13 +222,13 @@
 				</div>
 				
 				<div data-bind="if: !type">
-					<label for="result-text" data-bind="text: title"></label>
+					<label for="result-text" >TestString</label>
 					<input id="result-text" class="result-text" type="text" data-bind="attr : { 'name' : 'wrap.results[' + \$index() + '].value' }" >
 				</div>
 			</div>
 		</form>
 		
-		<span class="button confirm right"> Save Results </span>
+		<span class="button confirm right">Submit </span>
         <span class="button cancel"> Cancel </span>
 	</div>
 	
