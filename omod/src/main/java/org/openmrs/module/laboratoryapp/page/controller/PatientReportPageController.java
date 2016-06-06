@@ -31,7 +31,7 @@ import java.util.*;
  */
 public class PatientReportPageController {
     private static Logger logger = LoggerFactory.getLogger(PatientReportPageController.class);
-    public void get(
+    public String get(
             UiSessionContext sessionContext,
             @RequestParam("patientId") Integer patientId,
             @RequestParam(value = "selectedDate", required = false) String dateStr,
@@ -40,6 +40,10 @@ public class PatientReportPageController {
             PageRequest pageRequest){
         pageRequest.getSession().setAttribute(ReferenceApplicationWebConstants.SESSION_ATTRIBUTE_REDIRECT_URL,ui.thisUrl());
         sessionContext.requireAuthentication();
+        Boolean isPriviledged = Context.hasPrivilege("Access Laboratory");
+        if(!isPriviledged){
+            return "redirect: index.htm";
+        }
         Patient patient = Context.getPatientService().getPatient(patientId);
         HospitalCoreService hcs = Context.getService(HospitalCoreService.class);
 
@@ -95,6 +99,7 @@ public class PatientReportPageController {
                 logger.error(e.getMessage());
             }
         }
+        return null;
     }
     private List<TestResultModel> renderTests(List<LabTest> tests, Map<Concept, Set<Concept>> testTreeMap) {
         List<TestResultModel> trms = new ArrayList<TestResultModel>();
