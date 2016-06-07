@@ -17,12 +17,16 @@ import org.openmrs.ui.framework.page.PageRequest;
 
 public class QueuePageController {
 
-	public void get(UiSessionContext sessionContext,
+	public String get(UiSessionContext sessionContext,
 					PageModel model,
 					PageRequest pageRequest,
 					UiUtils ui) {
 		pageRequest.getSession().setAttribute(ReferenceApplicationWebConstants.SESSION_ATTRIBUTE_REDIRECT_URL,ui.thisUrl());
 		sessionContext.requireAuthentication();
+		Boolean isPriviledged = Context.hasPrivilege("Access Laboratory");
+		if(!isPriviledged){
+			return "redirect: index.htm";
+		}
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 		String dateStr = sdf.format(new Date());
 		model.addAttribute("currentDate", dateStr);
@@ -32,6 +36,7 @@ public class QueuePageController {
 			Set<Concept> investigations = department.getInvestigationsToDisplay();
 			model.addAttribute("investigations", investigations);
 		}
+		return null;
 	}
 
 }
