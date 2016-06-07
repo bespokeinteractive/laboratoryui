@@ -295,6 +295,10 @@
 	.dialog select option {
 		font-size: 1em;
 	}
+	#modal-overlay {
+		background: #000 none repeat scroll 0 0;
+		opacity: 0.4 !important;
+	}
 </style>
 <header>
 </header>

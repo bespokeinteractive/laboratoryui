@@ -13,6 +13,10 @@
         ko.applyBindings(editResultsParameterOpts, jq("#edit-result-form")[0]);
 		
 		editResultsDialog = emr.setupConfirmationDialog({
+			dialogOpts: {
+				overlayClose: false,
+				close: true
+			},
 			selector: '#edit-result-form',
 			actions: {
 				confirm: function() {
