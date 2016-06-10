@@ -81,7 +81,12 @@
 			});
 			jq.each(parameterOptions, function(index, parameterOption) {
 				parameterOption['patientName'] = details.patientName;
-				parameterOption['testName'] = details.test.name;
+				if(details.test.name === "HAEMOGLOBIN"){
+					 parameterOption['testName'] = details.test.name + " (g/dl)"
+					}
+				else{
+					parameterOption['testName'] = details.test.name;
+					}
 				parameterOption['startDate'] = details.startDate;
 				parameterOpts.parameterOptions.push(parameterOption);
 			});
