@@ -30,6 +30,7 @@ public class ParameterModel implements Comparable<ParameterModel> {
 	private String type;
 	private String title;
 	private String container;
+	private Integer containerId;
 	private List<ParameterOption> options = new ArrayList<ParameterOption>();
 	private String defaultValue;
 	private String unit;
@@ -81,6 +82,14 @@ public class ParameterModel implements Comparable<ParameterModel> {
 	
 	public void setContainer(String container) {
 		this.container = container;
+	}
+	
+	public Integer getContainerId() {
+		return containerId;
+	}
+	
+	public void setContainerId(Integer containerId) {
+		this.containerId = containerId;
 	}
 
 	public String getUnit() {

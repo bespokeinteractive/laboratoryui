@@ -508,6 +508,7 @@ public class LaboratoryUtil {
 		ParameterModel parameter = new ParameterModel();
 		parameter.setId(concept.getId().toString());
 		parameter.setContainer(parentConcept.getDisplayString());
+		parameter.setContainerId(parentConcept.getId());
 		setDefaultParameterValue(concept, encounter, parameter);
 		if (concept.getDatatype().getName().equalsIgnoreCase("Text")) {
 			parameter.setId(concept.getName().getName().trim());
