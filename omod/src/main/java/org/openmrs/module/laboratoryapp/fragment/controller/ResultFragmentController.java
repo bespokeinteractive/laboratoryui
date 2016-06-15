@@ -39,6 +39,7 @@ public class ResultFragmentController {
 			resultTemplate.put("type", parameter.getType());
 			resultTemplate.put("id", parameter.getId());
 			resultTemplate.put("container", parameter.getContainer());
+			resultTemplate.put("title", parameter.getTitle());
 			resultTemplate.put("unit", parameter.getUnit());
 			resultTemplate.put("validator", parameter.getValidator());
 			resultTemplate.put("defaultValue", parameter.getDefaultValue());
