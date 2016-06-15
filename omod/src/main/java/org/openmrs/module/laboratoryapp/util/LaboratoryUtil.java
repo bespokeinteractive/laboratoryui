@@ -481,14 +481,15 @@ public class LaboratoryUtil {
 	 */
 	public static void generateParameterModels(List<ParameterModel> parameters,
 			Concept concept,
+			Concept parentConcept,
 			Encounter encounter) {
 		if (concept.getConceptClass().getName().equalsIgnoreCase("LabSet")) {
 			List<Concept> concepts = getParameterConcepts(concept);
 			for (Concept c : concepts) {
-				generateParameterModels(parameters, c, encounter);
+				generateParameterModels(parameters, c, concept, encounter);
 			}
 		} else {
-			ParameterModel parameter = generateParameterModel(concept, encounter);
+			ParameterModel parameter = generateParameterModel(concept, parentConcept, encounter);
 			parameters.add(parameter);
 		}
 	}
@@ -503,8 +504,9 @@ public class LaboratoryUtil {
 		return concepts;
 	}
 
-	private static ParameterModel generateParameterModel(Concept concept, Encounter encounter) {
+	private static ParameterModel generateParameterModel(Concept concept, Concept parentConcept,Encounter encounter) {
 		ParameterModel parameter = new ParameterModel();
+		parameter.setId(concept.getId().toString());
 		setDefaultParameterValue(concept, encounter, parameter);
 		if (concept.getDatatype().getName().equalsIgnoreCase("Text")) {
 			parameter.setId(concept.getName().getName().trim());
@@ -519,7 +521,7 @@ public class LaboratoryUtil {
 
 			for (ConceptAnswer ca : concept.getAnswers()) {
 				Concept c = ca.getAnswerConcept();
-				parameter.addOption(new ParameterOption(c.getName().getName(), c.getName().getName()));
+				parameter.addOption(new ParameterOption(c.getName().getName(), c.getId().toString()));
 			}
 		}
 		parameter.setValidator(" required");

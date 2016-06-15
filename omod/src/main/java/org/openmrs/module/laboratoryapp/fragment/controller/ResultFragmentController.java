@@ -9,7 +9,6 @@ import org.openmrs.*;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.hospitalcore.BillingConstants;
 import org.openmrs.module.hospitalcore.PatientQueueService;
-import org.openmrs.module.hospitalcore.matcher.RegistrationUtils;
 import org.openmrs.module.hospitalcore.model.LabTest;
 import org.openmrs.module.hospitalcore.model.OpdPatientQueue;
 import org.openmrs.module.hospitalcore.model.OpdPatientQueueLog;
@@ -17,6 +16,7 @@ import org.openmrs.module.hospitalcore.util.GlobalPropertyUtil;
 import org.openmrs.module.laboratory.LaboratoryService;
 import org.openmrs.module.laboratoryapp.util.LaboratoryUtil;
 import org.openmrs.module.laboratoryapp.util.ParameterModel;
+import org.openmrs.module.laboratoryapp.util.ParameterOption;
 import org.openmrs.module.laboratoryapp.util.ResultModel;
 import org.openmrs.module.laboratoryapp.util.ResultModelWrapper;
 import org.openmrs.ui.framework.SimpleObject;
@@ -31,9 +31,27 @@ public class ResultFragmentController {
 		LaboratoryService ls = Context.getService(LaboratoryService.class);
 		LabTest test = ls.getLaboratoryTest(testId);		
 		List<ParameterModel> parameters = new ArrayList<ParameterModel>();
-		LaboratoryUtil.generateParameterModels(parameters, test.getConcept(), test.getEncounter());
+		LaboratoryUtil.generateParameterModels(parameters, test.getConcept(), null, test.getEncounter());
 		
-		return SimpleObject.fromCollection(parameters, ui, "type", "title", "options.label", "options.value", "unit", "defaultValue", "validator");
+		List<SimpleObject> resultsTemplate = new ArrayList<SimpleObject>();
+		for (ParameterModel parameter : parameters) {
+			SimpleObject resultTemplate = new SimpleObject();
+			resultTemplate.put("type", parameter.getType());
+			resultTemplate.put("id", parameter.getId());
+			resultTemplate.put("container", parameter.getContainer());
+			resultTemplate.put("unit", parameter.getUnit());
+			resultTemplate.put("validator", parameter.getValidator());
+			resultTemplate.put("defaultValue", parameter.getDefaultValue());
+			for (ParameterOption option : parameter.getOptions()) {
+				SimpleObject parameterOption = new SimpleObject();
+				parameterOption.put("label", option.getLabel());
+				parameterOption.put("value", option.getValue());
+				resultTemplate.put("options", parameterOption);
+			}
+			resultsTemplate.add(resultTemplate);
+		}
+		
+		return resultsTemplate;
 	}
 	
 	public SimpleObject saveResult(
