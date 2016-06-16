@@ -51,7 +51,12 @@
 			});
 			jq.each(editResultsParameterOptions, function(index, editResultsParameterOption) {
 				editResultsParameterOption['patientName'] = details.patientName;
-				editResultsParameterOption['testName'] = details.test.name;
+				if(details.test.name === "HAEMOGLOBIN"){
+					editResultsParameterOption['testName'] = details.test.name + " (g/dl)"
+					}
+				else{
+					editResultsParameterOption['testName'] = details.test.name;
+					}
 				editResultsParameterOption['startDate'] = details.startDate;
 				editResultsParameterOpts.editResultsParameterOptions.push(editResultsParameterOption);
 			});
@@ -227,7 +232,7 @@
 			</div>
 		</form>
 		
-		<span class="button confirm right"> Save Results </span>
+		<span class="button confirm right">Save Results </span>
         <span class="button cancel"> Cancel </span>
 	</div>
 	
