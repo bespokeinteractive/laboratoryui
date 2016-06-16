@@ -108,14 +108,14 @@ public class ParameterModel implements Comparable<ParameterModel> {
 		this.validator = validator;
 	}
 
-	public int compareTo(ParameterModel o) {
-		if (StringUtils.isBlank(o.getId()))
+	public int compareTo(ParameterModel otherParameterModel) {
+		if (otherParameterModel.getContainerId() == null)
 			return 1;
-		if (StringUtils.isBlank(this.getId()))
+		if (this.getContainerId() == null)
 			return -1;
-		String thisId = id;
-		String oId = o.getId();
-		return thisId.compareToIgnoreCase(oId);
+		Integer thisContainerId = containerId;
+		Integer otherContainerId = otherParameterModel.getContainerId();
+		return thisContainerId.compareTo(otherContainerId);
 	}
 
 	public String toString() {

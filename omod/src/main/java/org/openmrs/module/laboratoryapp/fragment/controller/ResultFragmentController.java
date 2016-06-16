@@ -1,6 +1,7 @@
 package org.openmrs.module.laboratoryapp.fragment.controller;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -32,7 +33,7 @@ public class ResultFragmentController {
 		LabTest test = ls.getLaboratoryTest(testId);		
 		List<ParameterModel> parameters = new ArrayList<ParameterModel>();
 		LaboratoryUtil.generateParameterModels(parameters, test.getConcept(), null, test.getEncounter());
-		
+		Collections.sort(parameters);
 		List<SimpleObject> resultsTemplate = new ArrayList<SimpleObject>();
 		for (ParameterModel parameter : parameters) {
 			SimpleObject resultTemplate = new SimpleObject();
