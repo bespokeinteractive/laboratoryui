@@ -45,12 +45,14 @@ public class ResultFragmentController {
 			resultTemplate.put("unit", parameter.getUnit());
 			resultTemplate.put("validator", parameter.getValidator());
 			resultTemplate.put("defaultValue", parameter.getDefaultValue());
+			List<SimpleObject> options = new ArrayList<SimpleObject>();
 			for (ParameterOption option : parameter.getOptions()) {
 				SimpleObject parameterOption = new SimpleObject();
 				parameterOption.put("label", option.getLabel());
 				parameterOption.put("value", option.getValue());
-				resultTemplate.put("options", parameterOption);
+				options.add(parameterOption);
 			}
+			resultTemplate.put("options", options);
 			resultsTemplate.add(resultTemplate);
 		}
 		
