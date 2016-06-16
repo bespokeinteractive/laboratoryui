@@ -506,19 +506,18 @@ public class LaboratoryUtil {
 
 	private static ParameterModel generateParameterModel(Concept concept, Concept parentConcept,Encounter encounter) {
 		ParameterModel parameter = new ParameterModel();
-		parameter.setId(concept.getId().toString());
-		parameter.setContainer(parentConcept.getDisplayString());
-		parameter.setContainerId(parentConcept.getId());
+		parameter.setId(concept.getConceptId().toString());
+		if (parentConcept != null) {
+			parameter.setContainer(parentConcept.getDisplayString());
+			parameter.setContainerId(parentConcept.getId());
+		}
 		setDefaultParameterValue(concept, encounter, parameter);
 		if (concept.getDatatype().getName().equalsIgnoreCase("Text")) {
-			parameter.setId(concept.getName().getName().trim());
 			parameter.setType("text");
 		} else if (concept.getDatatype().getName().equalsIgnoreCase("Numeric")) {
-			parameter.setId(concept.getName().getName().trim());
 			parameter.setType("number");
 			parameter.setUnit(getUnit(concept));
 		} else if (concept.getDatatype().getName().equalsIgnoreCase("Coded")) {
-			parameter.setId(concept.getName().getName().trim());
 			parameter.setType("select");
 
 			for (ConceptAnswer ca : concept.getAnswers()) {
