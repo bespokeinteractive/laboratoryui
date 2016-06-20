@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.lang.StringUtils;
 import org.openmrs.*;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.hospitalcore.BillingConstants;
@@ -80,16 +81,22 @@ public class ResultFragmentController {
 		encounter.setUuid(UUID.randomUUID().toString());
 		encounter.setEncounterDatetime(new Date());
 		
+		//TODO get date from user
 		Order order = test.getOrder();
 		order.setDiscontinued(true);
 		order.setDiscontinuedDate(new Date());
 		
 		for (ResultModel resultModel : resultWrapper.getResults()) {
-			Concept concept = LaboratoryUtil.searchConcept(resultModel.getConceptName());
 			String result = resultModel.getSelectedOption() == null ? resultModel.getValue() : resultModel.getSelectedOption();
-			Obs obs = insertValue(encounter, concept, result, test);
-			if (obs.getId() == null)
-				encounter.addObs(obs);
+			if (StringUtils.contains(resultModel.getConceptName(), ".")) {
+				String[] parentChildConceptIds = resultModel.getConceptName().split(".");
+				Concept testGroupConcept = Context.getConceptService().getConcept(parentChildConceptIds[0]);
+				Concept testConcept = Context.getConceptService().getConcept(parentChildConceptIds[1]);
+				addLaboratoryTestObservation(encounter, testConcept, testGroupConcept, result, test);
+			} else {
+				Concept concept = Context.getConceptService().getConcept(resultModel.getConceptName());
+				addLaboratoryTestObservation(encounter, concept, null, result, test);
+			}
 		}
 		
 		encounter = Context.getEncounterService().saveEncounter(encounter);
@@ -103,8 +110,7 @@ public class ResultFragmentController {
 		return SimpleObject.create("status", "success", "message", "Saved!");
 	}
 
-	private void sendPatientToOpdQueue(Encounter encounter)
-	{
+	private void sendPatientToOpdQueue(Encounter encounter) {
 		Patient patient = encounter.getPatient();
 		PatientQueueService queueService = Context.getService(PatientQueueService.class);
 		Concept referralConcept = Context.getConceptService().getConcept(LAB_CONCEPT_ID);
@@ -127,12 +133,9 @@ public class ResultFragmentController {
 			patientInQueue.setOpdConcept(selectedOPDConcept);
 			patientInQueue.setTriageDataId(patientQueueLog.getTriageDataId());
 			patientInQueue.setOpdConceptName(selectedOPDConcept.getName().getName());
-			if(null!=patient.getMiddleName())
-			{
+			if(null!=patient.getMiddleName()) {
 				patientInQueue.setPatientName(patient.getGivenName() + " " + patient.getFamilyName() + " " + patient.getMiddleName());
-			}
-			else
-			{
+			} else {
 				patientInQueue.setPatientName(patient.getGivenName() + " " + patient.getFamilyName());
 			}
 
@@ -141,30 +144,35 @@ public class ResultFragmentController {
 			patientInQueue.setCategory(selectedCategory);
 			patientInQueue.setVisitStatus(visitStatus);
 			queueService.saveOpdPatientQueue(patientInQueue);
-
-		}
-		else{
+		} else {
 			patientInQueue.setReferralConcept(referralConcept);
 			queueService.saveOpdPatientQueue(patientInQueue);
 		}
 	}
 	
-	private Obs insertValue(Encounter encounter, Concept concept, String value,
-			LabTest test) {
-
-		Obs obs = getObs(encounter, concept);
-		obs.setConcept(concept);
+	private void addLaboratoryTestObservation(Encounter encounter, Concept testConcept, Concept testGroupConcept,
+			String result, LabTest test) {
+		Obs obs = getObs(encounter, testConcept);
+		obs.setConcept(testConcept);
 		obs.setOrder(test.getOrder());
-		if (concept.getDatatype().getName().equalsIgnoreCase("Text")) {
-			obs.setValueText(value);
-		}
-		else if( concept.getDatatype().getName().equalsIgnoreCase("Numeric")){
-			obs.setValueNumeric(Double.parseDouble(value));
-		}else if (concept.getDatatype().getName().equalsIgnoreCase("Coded")) {
-			Concept answerConcept = LaboratoryUtil.searchConcept(value);
+		if (testConcept.getDatatype().getName().equalsIgnoreCase("Text")) {
+			obs.setValueText(result);
+		} else if ( testConcept.getDatatype().getName().equalsIgnoreCase("Numeric")){
+			obs.setValueNumeric(Double.parseDouble(result));
+		} else if (testConcept.getDatatype().getName().equalsIgnoreCase("Coded")) {
+			Concept answerConcept = LaboratoryUtil.searchConcept(result);
 			obs.setValueCoded(answerConcept);
 		}
-		return obs;
+		if (testGroupConcept != null) {
+			Obs testGroupObs = getObs(encounter, testConcept);
+			if (testGroupObs.getConcept() == null) {
+				//TODO find out what valueGroupId is and set to testGroupObs if necessary
+				testGroupObs.setConcept(testGroupConcept);
+				encounter.addObs(testGroupObs);
+			}
+			testGroupObs.addGroupMember(obs);
+		}
+		encounter.addObs(obs);
 	}
 
 	private Obs getObs(Encounter encounter, Concept concept) {
