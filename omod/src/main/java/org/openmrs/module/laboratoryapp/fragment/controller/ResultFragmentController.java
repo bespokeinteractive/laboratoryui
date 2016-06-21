@@ -24,10 +24,13 @@ import org.openmrs.module.laboratoryapp.util.ResultModelWrapper;
 import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.annotation.BindParams;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestParam;
 
 public class ResultFragmentController {
-		private static final Integer LAB_CONCEPT_ID = 2548;
+	private static final Integer LAB_CONCEPT_ID = 2548;
+	private Logger log = LoggerFactory.getLogger(ResultFragmentController.class);
 
 	public List<SimpleObject> getResultTemplate(@RequestParam("testId") Integer testId, UiUtils ui) {
 		LaboratoryService ls = Context.getService(LaboratoryService.class);
@@ -89,7 +92,7 @@ public class ResultFragmentController {
 		for (ResultModel resultModel : resultWrapper.getResults()) {
 			String result = resultModel.getSelectedOption() == null ? resultModel.getValue() : resultModel.getSelectedOption();
 			if (StringUtils.contains(resultModel.getConceptName(), ".")) {
-				String[] parentChildConceptIds = resultModel.getConceptName().split(".");
+				String[] parentChildConceptIds = StringUtils.split(resultModel.getConceptName(), ".");
 				Concept testGroupConcept = Context.getConceptService().getConcept(parentChildConceptIds[0]);
 				Concept testConcept = Context.getConceptService().getConcept(parentChildConceptIds[1]);
 				addLaboratoryTestObservation(encounter, testConcept, testGroupConcept, result, test);
@@ -152,6 +155,8 @@ public class ResultFragmentController {
 	
 	private void addLaboratoryTestObservation(Encounter encounter, Concept testConcept, Concept testGroupConcept,
 			String result, LabTest test) {
+		log.warn("testConceptId=" + testConcept);
+		log.warn("testGroupConceptId=" + testGroupConcept);
 		Obs obs = getObs(encounter, testConcept);
 		obs.setConcept(testConcept);
 		obs.setOrder(test.getOrder());
@@ -164,12 +169,13 @@ public class ResultFragmentController {
 			obs.setValueCoded(answerConcept);
 		}
 		if (testGroupConcept != null) {
-			Obs testGroupObs = getObs(encounter, testConcept);
+			Obs testGroupObs = getObs(encounter, testGroupConcept);
 			if (testGroupObs.getConcept() == null) {
 				//TODO find out what valueGroupId is and set to testGroupObs if necessary
 				testGroupObs.setConcept(testGroupConcept);
 				encounter.addObs(testGroupObs);
 			}
+			log.warn("Adding obs[concept="+ obs.getConcept() +",uuid="+ obs.getUuid() +"] to obsgroup[concept="+ testGroupObs.getConcept() +", uuid="+ testGroupObs.getUuid() +"]");
 			testGroupObs.addGroupMember(obs);
 		}
 		encounter.addObs(obs);
