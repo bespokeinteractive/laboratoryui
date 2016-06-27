@@ -323,7 +323,7 @@
 			</div>
 			
 			<div data-bind="foreach: parameterOptions">
-				<input type="hidden" data-bind="attr: { 'name' : 'wrap.results[' + \$index() + '].' }, value: containerId+'.'+id" >
+				<input type="hidden" data-bind="attr: { 'name' : 'wrap.results[' + \$index() + '].conceptName' }, value: containerId?containerId+'.'+id:id" >
 				
 				<!--Test for Select-->
 				<div data-bind="if:type && type.toLowerCase() === 'select'">
@@ -338,7 +338,7 @@
 						
 						<select id="result-option" 
 							data-bind="attr : { 'name' : 'wrap.results[' + \$index() + '].selectedOption' },
-								foreach: options">
+								foreach: options" style="width: 98%;">
 							<option data-bind="attr: { name : value, selected : (\$parent.defaultValue === value) }, text: label"></option>
 						</select>
 					</p>
@@ -379,8 +379,8 @@
 			</div>
 		</form>
 		
-		<span class="button confirm right"> Confirm </span>
-        <span class="button cancel"> Cancel </span>
+		<span class="button confirm right">Confirm</span>
+        <span class="button cancel">Cancel</span>
 	</div>
 	
 	
