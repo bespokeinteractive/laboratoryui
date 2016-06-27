@@ -157,7 +157,8 @@ public class ResultFragmentController {
 			String result, LabTest test) {
 		log.warn("testConceptId=" + testConcept);
 		log.warn("testGroupConceptId=" + testGroupConcept);
-		Obs obs = getObs(encounter, testConcept);
+		Obs obs = getObs(encounter, testConcept, testGroupConcept);
+		setObsAttributes(obs, encounter);
 		obs.setConcept(testConcept);
 		obs.setOrder(test.getOrder());
 		if (testConcept.getDatatype().getName().equalsIgnoreCase("Text")) {
@@ -169,23 +170,43 @@ public class ResultFragmentController {
 			obs.setValueCoded(answerConcept);
 		}
 		if (testGroupConcept != null) {
-			Obs testGroupObs = getObs(encounter, testGroupConcept);
+			Obs testGroupObs = getObs(encounter, testGroupConcept, null);
 			if (testGroupObs.getConcept() == null) {
 				//TODO find out what valueGroupId is and set to testGroupObs if necessary
 				testGroupObs.setConcept(testGroupConcept);
+				setObsAttributes(testGroupObs, encounter);
 				encounter.addObs(testGroupObs);
 			}
 			log.warn("Adding obs[concept="+ obs.getConcept() +",uuid="+ obs.getUuid() +"] to obsgroup[concept="+ testGroupObs.getConcept() +", uuid="+ testGroupObs.getUuid() +"]");
 			testGroupObs.addGroupMember(obs);
+		} else {
+			encounter.addObs(obs);
 		}
-		encounter.addObs(obs);
+		log.warn("Obs size is: " + encounter.getObs().size());
 	}
 
-	private Obs getObs(Encounter encounter, Concept concept) {
+	private void setObsAttributes(Obs obs, Encounter encounter) {
+		obs.setObsDatetime(encounter.getEncounterDatetime());
+		obs.setPerson(encounter.getPatient());
+		obs.setLocation(encounter.getLocation());
+	}
+
+	private Obs getObs(Encounter encounter, Concept concept, Concept groupingConcept) {
 		for (Obs obs : encounter.getAllObs()) {
-			if (obs.getConcept().equals(concept))
+			if (groupingConcept != null) {
+				Obs obsGroup = getObs(encounter, groupingConcept, null);
+				if (obsGroup.getGroupMembers() != null) {
+					for (Obs member : obsGroup.getGroupMembers()) {
+						if (member.getConcept().equals(concept)) {
+							return member;
+						}
+					}
+				}
+			} else if (obs.getConcept().equals(concept)) {
 				return obs;
+			}
 		}
 		return new Obs();
 	}
 }
+ 
