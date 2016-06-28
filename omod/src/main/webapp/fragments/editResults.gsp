@@ -207,7 +207,7 @@
 						<select id="result-option" 
 							data-bind="attr : { 'name' : 'wrap.results[' + \$index() + '].selectedOption' },
 								foreach: options" style="width: 98%;">
-							<option data-bind="attr: { name : value, selected : (\$parent.defaultValue === value) }, text: label"></option>
+							<option data-bind="attr: { name : value, selected : (\$parent.defaultValue === label) }, text: label"></option>
 						</select>
 					</p>
 				</div>
