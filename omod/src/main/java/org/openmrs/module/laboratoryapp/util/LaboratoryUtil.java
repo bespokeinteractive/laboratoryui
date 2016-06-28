@@ -62,7 +62,6 @@ public class LaboratoryUtil {
 	 */
 	public static List<TestModel> generateModelsFromOrders(List<Order> orders,
 			Map<Concept, Set<Concept>> testTreeMap) {
-
 		List<TestModel> models = new ArrayList<TestModel>();
 		for (Order order : orders) {
 			TestModel tm = generateModel(order, testTreeMap);
@@ -511,7 +510,7 @@ public class LaboratoryUtil {
 			parameter.setContainer(parentConcept.getDisplayString());
 			parameter.setContainerId(parentConcept.getId());
 		}
-		setDefaultParameterValue(concept, encounter, parameter);
+		setDefaultParameterValue(concept, parentConcept, encounter, parameter);
 		if (concept.getDatatype().getName().equalsIgnoreCase("Text")) {
 			parameter.setType("text");
 		} else if (concept.getDatatype().getName().equalsIgnoreCase("Numeric")) {
@@ -530,10 +529,16 @@ public class LaboratoryUtil {
 		return parameter;
 	}
 
-	private static void setDefaultParameterValue(Concept concept, Encounter encounter, ParameterModel parameter) {
+	private static void setDefaultParameterValue(Concept concept, Concept parentConcept, Encounter encounter, ParameterModel parameter) {
 		if (encounter != null) {
 			for (Obs obs : encounter.getAllObs()) {
-				if (concept.equals(obs.getConcept())) {
+				if (parentConcept != null && 
+					obs.getObsGroup() != null &&
+					obs.getObsGroup().getConcept().equals(parentConcept) && 
+					obs.getConcept().equals(concept)) {
+					parameter.setDefaultValue(obs.getValueAsString(Context.getLocale()));
+					break;
+				} else if (concept.equals(obs.getConcept()) && obs.getObsGroup() == null) {
 					parameter.setDefaultValue(obs.getValueAsString(Context.getLocale()));
 					break;
 				}
