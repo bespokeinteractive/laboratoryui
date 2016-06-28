@@ -172,7 +172,9 @@ public class ResultFragmentController {
 		if (testConcept.getDatatype().getName().equalsIgnoreCase("Text")) {
 			obs.setValueText(result);
 		} else if ( testConcept.getDatatype().getName().equalsIgnoreCase("Numeric")){
-			obs.setValueNumeric(Double.parseDouble(result));
+			if (!result.equals("")){
+				obs.setValueNumeric(Double.parseDouble(result));
+			}
 		} else if (testConcept.getDatatype().getName().equalsIgnoreCase("Coded")) {
 			Concept answerConcept = LaboratoryUtil.searchConcept(result);
 			obs.setValueCoded(answerConcept);

@@ -88,7 +88,6 @@
 			
 			resultDialog.show();
 		});
-		
 	}
 	
 	function saveResult(){
