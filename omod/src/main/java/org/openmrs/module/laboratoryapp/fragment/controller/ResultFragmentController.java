@@ -67,22 +67,7 @@ public class ResultFragmentController {
 			@BindParams("wrap") ResultModelWrapper resultWrapper){
 		LaboratoryService ls = (LaboratoryService) Context.getService(LaboratoryService.class);
 		LabTest test = ls.getLaboratoryTest(resultWrapper.getTestId());
-		//TODO: define constant in this module and use that
-		String encounterTypeStr = GlobalPropertyUtil.getString(BillingConstants.GLOBAL_PROPRETY_LAB_ENCOUNTER_TYPE, "LABENCOUNTER");
-		EncounterType encounterType = Context.getEncounterService().getEncounterType(encounterTypeStr);
-		Encounter encounter = new Encounter();
-		encounter.setCreator(Context.getAuthenticatedUser());
-		encounter.setDateCreated(new Date());
-
-		//TODO: Use location from session
-		Location loc = Context.getLocationService().getLocation(1);
-		encounter.setLocation(loc);
-		encounter.setPatient(test.getPatient());
-		encounter.setEncounterType(encounterType);
-		encounter.setVoided(false);
-		encounter.setCreator(Context.getAuthenticatedUser());
-		encounter.setUuid(UUID.randomUUID().toString());
-		encounter.setEncounterDatetime(new Date());
+		Encounter encounter = getEncounter(test);
 		
 		//TODO get date from user
 		Order order = test.getOrder();
@@ -111,6 +96,29 @@ public class ResultFragmentController {
 		this.sendPatientToOpdQueue(encounter);
 
 		return SimpleObject.create("status", "success", "message", "Saved!");
+	}
+
+	private Encounter getEncounter(LabTest test) {
+		if (test.getEncounter() != null) {
+			return test.getEncounter();
+		}
+		//TODO: define constant in this module and use that
+		String encounterTypeStr = GlobalPropertyUtil.getString(BillingConstants.GLOBAL_PROPRETY_LAB_ENCOUNTER_TYPE, "LABENCOUNTER");
+		EncounterType encounterType = Context.getEncounterService().getEncounterType(encounterTypeStr);
+		Encounter encounter = new Encounter();
+		encounter.setCreator(Context.getAuthenticatedUser());
+		encounter.setDateCreated(new Date());
+
+		//TODO: Use location from session
+		Location loc = Context.getLocationService().getLocation(1);
+		encounter.setLocation(loc);
+		encounter.setPatient(test.getPatient());
+		encounter.setEncounterType(encounterType);
+		encounter.setVoided(false);
+		encounter.setCreator(Context.getAuthenticatedUser());
+		encounter.setUuid(UUID.randomUUID().toString());
+		encounter.setEncounterDatetime(new Date());
+		return encounter;
 	}
 
 	private void sendPatientToOpdQueue(Encounter encounter) {
@@ -189,6 +197,7 @@ public class ResultFragmentController {
 		obs.setObsDatetime(encounter.getEncounterDatetime());
 		obs.setPerson(encounter.getPatient());
 		obs.setLocation(encounter.getLocation());
+		obs.setEncounter(encounter);
 	}
 
 	private Obs getObs(Encounter encounter, Concept concept, Concept groupingConcept) {
