@@ -99,8 +99,8 @@ public class ResultFragmentController {
 	}
 
 	private Encounter getEncounter(LabTest test) {
-		if (test.getEncounter() != null) {
-			return test.getEncounter();
+		if (test.getOrder().getEncounter() != null) {
+			return test.getOrder().getEncounter();
 		}
 		//TODO: define constant in this module and use that
 		String encounterTypeStr = GlobalPropertyUtil.getString(BillingConstants.GLOBAL_PROPRETY_LAB_ENCOUNTER_TYPE, "LABENCOUNTER");
@@ -184,6 +184,7 @@ public class ResultFragmentController {
 			if (testGroupObs.getConcept() == null) {
 				//TODO find out what valueGroupId is and set to testGroupObs if necessary
 				testGroupObs.setConcept(testGroupConcept);
+				testGroupObs.setOrder(test.getOrder());
 				setObsAttributes(testGroupObs, encounter);
 				encounter.addObs(testGroupObs);
 			}
