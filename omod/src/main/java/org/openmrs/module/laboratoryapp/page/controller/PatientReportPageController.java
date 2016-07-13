@@ -4,17 +4,13 @@ import org.openmrs.*;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appui.UiSessionContext;
 import org.openmrs.module.hospitalcore.model.LabTest;
-import org.openmrs.module.hospitalcore.util.PatientDashboardConstants;
 import org.openmrs.module.laboratory.LaboratoryService;
 import org.openmrs.module.hospitalcore.HospitalCoreService;
 import org.openmrs.module.laboratoryapp.util.LaboratoryTestUtil;
-import org.openmrs.module.laboratoryapp.util.LaboratoryUtil;
 import org.openmrs.module.laboratoryapp.util.TestResultModel;
 import org.openmrs.module.referenceapplication.ReferenceApplicationWebConstants;
 import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.ui.framework.UiUtils;
-import org.openmrs.ui.framework.fragment.FragmentConfiguration;
-import org.openmrs.ui.framework.fragment.FragmentModel;
 import org.openmrs.ui.framework.page.PageModel;
 import org.openmrs.ui.framework.page.PageRequest;
 import org.slf4j.Logger;
@@ -24,7 +20,12 @@ import org.apache.commons.lang.StringUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by Francis on 2/10/2016.
@@ -73,7 +74,7 @@ public class PatientReportPageController {
         try {
             selectedDate = dateFormat.parse(dateStr);
         } catch (ParseException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
         }
 
         if (patient != null) {
@@ -104,18 +105,27 @@ public class PatientReportPageController {
     private List<TestResultModel> renderTests(List<LabTest> tests, Map<Concept, Set<Concept>> testTreeMap) {
         List<TestResultModel> trms = new ArrayList<TestResultModel>();
         for (LabTest test : tests) {
+            Concept investigation = getInvestigationByTest(test, testTreeMap);
             if (test.getEncounter() != null) {
                 Encounter encounter = test.getEncounter();
                 for (Obs obs : encounter.getAllObs()) {
-                    TestResultModel trm = new TestResultModel();
-                    Concept investigation = getInvestigationByTest(test, testTreeMap);
-                    trm.setInvestigation(LaboratoryUtil.getConceptName(investigation));
-                    trm.setSet(test.getConcept().getName().getName());
-                    Concept concept = Context.getConceptService().getConcept(obs.getConcept().getConceptId());
-                    trm.setTest(concept.getName().getName());
-                    trm.setConcept(test.getConcept());
-                    setTestResultModelValue(obs, trm);
-                    trms.add(trm);
+                    if (obs.hasGroupMembers()) {
+                        for (Obs groupMemberObs : obs.getGroupMembers()) {
+                            TestResultModel trm = new TestResultModel();
+                            trm.setInvestigation(investigation.getDisplayString());
+                            trm.setSet(obs.getConcept().getDisplayString());
+                            trm.setConcept(obs.getConcept());
+                            setTestResultModelValue(groupMemberObs, trm);
+                            trms.add(trm);
+                        }
+                    } else {
+                        TestResultModel trm = new TestResultModel();
+                        trm.setInvestigation(investigation.getDisplayString());
+                        trm.setSet(investigation.getDisplayString());
+                        trm.setConcept(obs.getConcept());
+                        setTestResultModelValue(obs, trm);
+                        trms.add(trm);
+                    }
                 }
             }
         }
@@ -131,8 +141,8 @@ public class PatientReportPageController {
     }
 
     private void setTestResultModelValue(Obs obs, TestResultModel trm) {
-        Concept concept = Context.getConceptService().getConcept(obs.getConcept().getConceptId());
-        trm.setTest(concept.getName().getName());
+        Concept concept = obs.getConcept();
+        trm.setTest(obs.getConcept().getDisplayString());
         if (concept != null) {
             String datatype = concept.getDatatype().getName();
             if (datatype.equalsIgnoreCase("Text")) {
@@ -186,9 +196,9 @@ public class PatientReportPageController {
             if (!trm.getSet().equalsIgnoreCase(set)) {
                 set = trm.getSet();
                 if (!trm.getConcept().getConceptClass().getName().equalsIgnoreCase("LabSet")) {
-                    trm.setLevel(TestResultModel.LEVEL_SET);
+                    trm.setLevel(TestResultModel.LEVEL_TEST);
                     trms.add(trm);
-                } else {
+                } else if (trm.getConcept().getConceptClass().getName().equalsIgnoreCase("LabSet")) {
                     TestResultModel t = new TestResultModel();
                     t.setSet(set);
                     t.setLevel(TestResultModel.LEVEL_SET);
