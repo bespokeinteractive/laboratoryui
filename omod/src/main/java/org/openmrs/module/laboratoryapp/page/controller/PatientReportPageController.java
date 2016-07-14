@@ -13,16 +13,11 @@ import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.page.PageModel;
 import org.openmrs.ui.framework.page.PageRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.apache.commons.lang.StringUtils;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,11 +26,10 @@ import java.util.Set;
  * Created by Francis on 2/10/2016.
  */
 public class PatientReportPageController {
-    private static Logger logger = LoggerFactory.getLogger(PatientReportPageController.class);
     public String get(
             UiSessionContext sessionContext,
             @RequestParam("patientId") Integer patientId,
-            @RequestParam(value = "selectedDate", required = false) String dateStr,
+            @RequestParam(value = "testId") Integer testId,
             PageModel model,
             UiUtils ui,
             PageRequest pageRequest){
@@ -68,64 +62,46 @@ public class PatientReportPageController {
 
         LaboratoryService ls = Context.getService(LaboratoryService.class);
 
-        Date selectedDate = new Date();
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-        try {
-            selectedDate = dateFormat.parse(dateStr);
-        } catch (ParseException e) {
-            logger.error(e.getMessage());
-        }
-
         if (patient != null) {
+            LabTest labTest = ls.getLaboratoryTest(testId);
+            if (labTest != null) {
+               Map<Concept, Set<Concept>> testTreeMap = LaboratoryTestUtil.getAllowableTests();
+                List<TestResultModel> trms = renderTests(labTest, testTreeMap);
+                trms = formatTestResult(trms);
 
-            List<LabTest> tests;
-            try {
-                tests = ls.getLaboratoryTestsByDateAndPatient(selectedDate, patient);
-                if ((tests != null) && (!tests.isEmpty())) {
-                    Map<Concept, Set<Concept>> testTreeMap = LaboratoryTestUtil.getAllowableTests();
-                    List<TestResultModel> trms = renderTests(tests, testTreeMap);
-                    trms = formatTestResult(trms);
-
-                    List<SimpleObject> results = SimpleObject.fromCollection(trms, ui,
-                            "investigation", "set", "test", "value", "hiNormal",
-                            "lowNormal", "lowAbsolute", "hiAbsolute", "hiCritical", "lowCritical",
-                            "unit", "level", "concept", "encounterId", "testId");
-                    SimpleObject currentResults = SimpleObject.create("data", results);
-                    model.addAttribute("currentResults", currentResults);
-                    model.addAttribute("test", ui.formatDatePretty(tests.get(0).getOrder().getStartDate()));
-
-                }
-            } catch (ParseException e) {
-                logger.error(e.getMessage());
+                List<SimpleObject> results = SimpleObject.fromCollection(trms, ui,
+                        "investigation", "set", "test", "value", "hiNormal",
+                        "lowNormal", "lowAbsolute", "hiAbsolute", "hiCritical", "lowCritical",
+                        "unit", "level", "concept", "encounterId", "testId");
+                SimpleObject currentResults = SimpleObject.create("data", results);
+                model.addAttribute("currentResults", currentResults);
+                model.addAttribute("test", ui.formatDatePretty(labTest.getOrder().getStartDate()));
             }
         }
         return null;
     }
-    private List<TestResultModel> renderTests(List<LabTest> tests, Map<Concept, Set<Concept>> testTreeMap) {
+    private List<TestResultModel> renderTests(LabTest test, Map<Concept, Set<Concept>> testTreeMap) {
         List<TestResultModel> trms = new ArrayList<TestResultModel>();
-        for (LabTest test : tests) {
-            Concept investigation = getInvestigationByTest(test, testTreeMap);
-            if (test.getEncounter() != null) {
-                Encounter encounter = test.getEncounter();
-                for (Obs obs : encounter.getAllObs()) {
-                    if (obs.hasGroupMembers()) {
-                        for (Obs groupMemberObs : obs.getGroupMembers()) {
-                            TestResultModel trm = new TestResultModel();
-                            trm.setInvestigation(investigation.getDisplayString());
-                            trm.setSet(obs.getConcept().getDisplayString());
-                            trm.setConcept(obs.getConcept());
-                            setTestResultModelValue(groupMemberObs, trm);
-                            trms.add(trm);
-                        }
-                    } else {
+        Concept investigation = getInvestigationByTest(test, testTreeMap);
+        if (test.getEncounter() != null) {
+            Encounter encounter = test.getEncounter();
+            for (Obs obs : encounter.getAllObs()) {
+                if (obs.hasGroupMembers()) {
+                    for (Obs groupMemberObs : obs.getGroupMembers()) {
                         TestResultModel trm = new TestResultModel();
                         trm.setInvestigation(investigation.getDisplayString());
-                        trm.setSet(investigation.getDisplayString());
+                        trm.setSet(obs.getConcept().getDisplayString());
                         trm.setConcept(obs.getConcept());
-                        setTestResultModelValue(obs, trm);
+                        setTestResultModelValue(groupMemberObs, trm);
                         trms.add(trm);
                     }
+                } else if (obs.getObsGroup() == null) {
+                    TestResultModel trm = new TestResultModel();
+                    trm.setInvestigation(investigation.getDisplayString());
+                    trm.setSet(investigation.getDisplayString());
+                    trm.setConcept(obs.getConcept());
+                    setTestResultModelValue(obs, trm);
+                    trms.add(trm);
                 }
             }
         }

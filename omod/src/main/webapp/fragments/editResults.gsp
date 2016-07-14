@@ -79,9 +79,8 @@
         });
     }
 
-    function loadPatientReport(patientId){
-        queryparamenters = "?patientId=" + patientId + '&selectedDate=' + editResultsDate;
-        window.location = '${ui.pageLink("laboratoryapp", "patientReport")}'+queryparamenters;
+    function loadPatientReport(patientId, testId){
+        window.location = emr.pageLink("laboratoryapp", "patientReport", {patientId: patientId, testId: testId});
     }
     function Result() {
         self = this;
@@ -158,7 +157,7 @@
 		<td data-bind="text: test.name"></td>
 		<td>
 			<a title="Edit Result" data-bind="attr: { href : 'javascript:showEditResultForm(' + testId + ')' }"><i class="icon-file-alt small"></i></a>
-			<a title="View Report" data-bind="attr: { href : 'javascript:loadPatientReport(' + patientId + ')' }"><i class="icon-bar-chart small"></i></a>
+			<a title="View Report" data-bind="attr: { href : 'javascript:loadPatientReport(' + patientId + ', ' + testId + ')' }"><i class="icon-bar-chart small"></i></a>
 		</td>
     </tbody>
 </table>
