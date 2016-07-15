@@ -127,6 +127,9 @@ public class ResultFragmentController {
 		Concept referralConcept = Context.getConceptService().getConcept(LAB_CONCEPT_ID);
 		Encounter queueEncounter = queueService.getLastOPDEncounter(encounter.getPatient());
 		OpdPatientQueueLog patientQueueLog =queueService.getOpdPatientQueueLogByEncounter(queueEncounter);
+		if (patientQueueLog == null) {
+			return;
+		}
 		Concept selectedOPDConcept = patientQueueLog.getOpdConcept();
 		String selectedCategory = patientQueueLog.getCategory();
 		String visitStatus = patientQueueLog.getVisitStatus();
