@@ -126,7 +126,7 @@ public class PatientReportPageController {
             } else if (datatype.equalsIgnoreCase("Numeric")) {
                 if (obs.getValueText() != null) {
                     trm.setValue(obs.getValueText().toString());
-                } else {
+                } else if (obs.getValueNumeric() != null) {
                     trm.setValue(obs.getValueNumeric().toString());
                 }
                 ConceptNumeric cn = Context.getConceptService().getConceptNumeric(concept.getConceptId());

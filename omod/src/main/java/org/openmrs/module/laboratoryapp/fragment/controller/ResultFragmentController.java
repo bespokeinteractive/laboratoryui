@@ -172,7 +172,7 @@ public class ResultFragmentController {
 		if (testConcept.getDatatype().getName().equalsIgnoreCase("Text")) {
 			obs.setValueText(result);
 		} else if ( testConcept.getDatatype().getName().equalsIgnoreCase("Numeric")){
-			if (!result.equals("")){
+			if (StringUtils.isNotBlank(result)){
 				obs.setValueNumeric(Double.parseDouble(result));
 			}
 		} else if (testConcept.getDatatype().getName().equalsIgnoreCase("Coded")) {
