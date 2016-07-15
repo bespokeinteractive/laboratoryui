@@ -99,8 +99,8 @@ public class ResultFragmentController {
 	}
 
 	private Encounter getEncounter(LabTest test) {
-		if (test.getOrder().getEncounter() != null) {
-			return test.getOrder().getEncounter();
+		if (test.getEncounter() != null) {
+			return test.getEncounter();
 		}
 		//TODO: define constant in this module and use that
 		String encounterTypeStr = GlobalPropertyUtil.getString(BillingConstants.GLOBAL_PROPRETY_LAB_ENCOUNTER_TYPE, "LABENCOUNTER");
