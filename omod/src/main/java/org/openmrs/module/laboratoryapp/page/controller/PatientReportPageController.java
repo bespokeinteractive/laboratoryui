@@ -4,37 +4,32 @@ import org.openmrs.*;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appui.UiSessionContext;
 import org.openmrs.module.hospitalcore.model.LabTest;
-import org.openmrs.module.hospitalcore.util.PatientDashboardConstants;
 import org.openmrs.module.laboratory.LaboratoryService;
 import org.openmrs.module.hospitalcore.HospitalCoreService;
 import org.openmrs.module.laboratoryapp.util.LaboratoryTestUtil;
-import org.openmrs.module.laboratoryapp.util.LaboratoryUtil;
 import org.openmrs.module.laboratoryapp.util.TestResultModel;
 import org.openmrs.module.referenceapplication.ReferenceApplicationWebConstants;
 import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.ui.framework.UiUtils;
-import org.openmrs.ui.framework.fragment.FragmentConfiguration;
-import org.openmrs.ui.framework.fragment.FragmentModel;
 import org.openmrs.ui.framework.page.PageModel;
 import org.openmrs.ui.framework.page.PageRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.apache.commons.lang.StringUtils;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by Francis on 2/10/2016.
  */
 public class PatientReportPageController {
-    private static Logger logger = LoggerFactory.getLogger(PatientReportPageController.class);
     public String get(
             UiSessionContext sessionContext,
             @RequestParam("patientId") Integer patientId,
-            @RequestParam(value = "selectedDate", required = false) String dateStr,
+            @RequestParam(value = "testId") Integer testId,
             PageModel model,
             UiUtils ui,
             PageRequest pageRequest){
@@ -67,53 +62,44 @@ public class PatientReportPageController {
 
         LaboratoryService ls = Context.getService(LaboratoryService.class);
 
-        Date selectedDate = new Date();
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-        try {
-            selectedDate = dateFormat.parse(dateStr);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
         if (patient != null) {
+            LabTest labTest = ls.getLaboratoryTest(testId);
+            if (labTest != null) {
+               Map<Concept, Set<Concept>> testTreeMap = LaboratoryTestUtil.getAllowableTests();
+                List<TestResultModel> trms = renderTests(labTest, testTreeMap);
+                trms = formatTestResult(trms);
 
-            List<LabTest> tests;
-            try {
-                tests = ls.getLaboratoryTestsByDateAndPatient(selectedDate, patient);
-                if ((tests != null) && (!tests.isEmpty())) {
-                    Map<Concept, Set<Concept>> testTreeMap = LaboratoryTestUtil.getAllowableTests();
-                    List<TestResultModel> trms = renderTests(tests, testTreeMap);
-                    trms = formatTestResult(trms);
-
-                    List<SimpleObject> results = SimpleObject.fromCollection(trms, ui,
-                            "investigation", "set", "test", "value", "hiNormal",
-                            "lowNormal", "lowAbsolute", "hiAbsolute", "hiCritical", "lowCritical",
-                            "unit", "level", "concept", "encounterId", "testId");
-                    SimpleObject currentResults = SimpleObject.create("data", results);
-                    model.addAttribute("currentResults", currentResults);
-                    model.addAttribute("test", ui.formatDatePretty(tests.get(0).getOrder().getStartDate()));
-
-                }
-            } catch (ParseException e) {
-                logger.error(e.getMessage());
+                List<SimpleObject> results = SimpleObject.fromCollection(trms, ui,
+                        "investigation", "set", "test", "value", "hiNormal",
+                        "lowNormal", "lowAbsolute", "hiAbsolute", "hiCritical", "lowCritical",
+                        "unit", "level", "concept", "encounterId", "testId");
+                SimpleObject currentResults = SimpleObject.create("data", results);
+                model.addAttribute("currentResults", currentResults);
+                model.addAttribute("test", ui.formatDatePretty(labTest.getOrder().getStartDate()));
             }
         }
         return null;
     }
-    private List<TestResultModel> renderTests(List<LabTest> tests, Map<Concept, Set<Concept>> testTreeMap) {
+    private List<TestResultModel> renderTests(LabTest test, Map<Concept, Set<Concept>> testTreeMap) {
         List<TestResultModel> trms = new ArrayList<TestResultModel>();
-        for (LabTest test : tests) {
-            if (test.getEncounter() != null) {
-                Encounter encounter = test.getEncounter();
-                for (Obs obs : encounter.getAllObs()) {
+        Concept investigation = getInvestigationByTest(test, testTreeMap);
+        if (test.getEncounter() != null) {
+            Encounter encounter = test.getEncounter();
+            for (Obs obs : encounter.getAllObs()) {
+                if (obs.hasGroupMembers()) {
+                    for (Obs groupMemberObs : obs.getGroupMembers()) {
+                        TestResultModel trm = new TestResultModel();
+                        trm.setInvestigation(investigation.getDisplayString());
+                        trm.setSet(obs.getConcept().getDisplayString());
+                        trm.setConcept(obs.getConcept());
+                        setTestResultModelValue(groupMemberObs, trm);
+                        trms.add(trm);
+                    }
+                } else if (obs.getObsGroup() == null) {
                     TestResultModel trm = new TestResultModel();
-                    Concept investigation = getInvestigationByTest(test, testTreeMap);
-                    trm.setInvestigation(LaboratoryUtil.getConceptName(investigation));
-                    trm.setSet(test.getConcept().getName().getName());
-                    Concept concept = Context.getConceptService().getConcept(obs.getConcept().getConceptId());
-                    trm.setTest(concept.getName().getName());
-                    trm.setConcept(test.getConcept());
+                    trm.setInvestigation(investigation.getDisplayString());
+                    trm.setSet(investigation.getDisplayString());
+                    trm.setConcept(obs.getConcept());
                     setTestResultModelValue(obs, trm);
                     trms.add(trm);
                 }
@@ -131,8 +117,8 @@ public class PatientReportPageController {
     }
 
     private void setTestResultModelValue(Obs obs, TestResultModel trm) {
-        Concept concept = Context.getConceptService().getConcept(obs.getConcept().getConceptId());
-        trm.setTest(concept.getName().getName());
+        Concept concept = obs.getConcept();
+        trm.setTest(obs.getConcept().getDisplayString());
         if (concept != null) {
             String datatype = concept.getDatatype().getName();
             if (datatype.equalsIgnoreCase("Text")) {
@@ -140,7 +126,7 @@ public class PatientReportPageController {
             } else if (datatype.equalsIgnoreCase("Numeric")) {
                 if (obs.getValueText() != null) {
                     trm.setValue(obs.getValueText().toString());
-                } else {
+                } else if (obs.getValueNumeric() != null) {
                     trm.setValue(obs.getValueNumeric().toString());
                 }
                 ConceptNumeric cn = Context.getConceptService().getConceptNumeric(concept.getConceptId());
@@ -186,9 +172,9 @@ public class PatientReportPageController {
             if (!trm.getSet().equalsIgnoreCase(set)) {
                 set = trm.getSet();
                 if (!trm.getConcept().getConceptClass().getName().equalsIgnoreCase("LabSet")) {
-                    trm.setLevel(TestResultModel.LEVEL_SET);
+                    trm.setLevel(TestResultModel.LEVEL_TEST);
                     trms.add(trm);
-                } else {
+                } else if (trm.getConcept().getConceptClass().getName().equalsIgnoreCase("LabSet")) {
                     TestResultModel t = new TestResultModel();
                     t.setSet(set);
                     t.setLevel(TestResultModel.LEVEL_SET);

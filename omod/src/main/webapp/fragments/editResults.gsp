@@ -38,7 +38,7 @@
     function showEditResultForm(testId) {
         getEditResultTempLate(testId);
         editResultsForm.find("#edit-result-id").val(testId);
-        editResultsDialog.show();
+        
     }
 
     function getEditResultTempLate(testId) {
@@ -55,6 +55,8 @@
 				editResultsParameterOption['startDate'] = details.startDate;
 				editResultsParameterOpts.editResultsParameterOptions.push(editResultsParameterOption);
 			});
+			
+			editResultsDialog.show();
 		});
     }
 
@@ -77,9 +79,8 @@
         });
     }
 
-    function loadPatientReport(patientId){
-        queryparamenters = "?patientId=" + patientId + '&selectedDate=' + editResultsDate;
-        window.location = '${ui.pageLink("laboratoryapp", "patientReport")}'+queryparamenters;
+    function loadPatientReport(patientId, testId){
+        window.location = emr.pageLink("laboratoryapp", "patientReport", {patientId: patientId, testId: testId});
     }
     function Result() {
         self = this;
@@ -156,7 +157,7 @@
 		<td data-bind="text: test.name"></td>
 		<td>
 			<a title="Edit Result" data-bind="attr: { href : 'javascript:showEditResultForm(' + testId + ')' }"><i class="icon-file-alt small"></i></a>
-			<a title="View Report" data-bind="attr: { href : 'javascript:loadPatientReport(' + patientId + ')' }"><i class="icon-bar-chart small"></i></a>
+			<a title="View Report" data-bind="attr: { href : 'javascript:loadPatientReport(' + patientId + ', ' + testId + ')' }"><i class="icon-bar-chart small"></i></a>
 		</td>
     </tbody>
 </table>
@@ -171,32 +172,41 @@
 		<form>
 			<input type="hidden" name="wrap.testId" id="edit-result-id" />
 			
-			<div data-bind="foreach: editResultsParameterOptions">
-				<input type="hidden" data-bind="attr: { 'name' : 'wrap.results[' + \$index() + '].conceptName' }, value: title" >
-								
+			<div data-bind="if: editResultsParameterOptions()[0]">			
 				<p>
 					<div class="dialog-data">Patient Name:</div>
-					<div class="inline" data-bind="text: patientName"></div>
+					<div class="inline" data-bind="text: editResultsParameterOptions()[0].patientName"></div>
 				</p>
 				
 				<p>
 					<div class="dialog-data">Test Name:</div>
-					<div class="inline" data-bind="text: testName"></div>
+					<div class="inline" data-bind="text: editResultsParameterOptions()[0].testName"></div>
 				</p>
 				
 				<p>
 					<div class="dialog-data">Patient Name:</div>
-					<div class="inline" data-bind="text: startDate"></div>
-				</p>
+					<div class="inline" data-bind="text: editResultsParameterOptions()[0].startDate"></div>
+				</p>				
+			</div>
+			
+			<div data-bind="foreach: editResultsParameterOptions">
+				<input type="hidden" data-bind="attr: { 'name' : 'wrap.results[' + \$index() + '].conceptName' }, value: containerId?containerId+'.'+id:id" >
+								
 				
-				
-				<div data-bind="if: type && type.toLowerCase() === 'select'">
+				<div data-bind="if:type && type.toLowerCase() === 'select'">
 					<p>
-						<label for="resultr-option" class="dialog-data input-position-class left" data-bind="text: title"></label>
-						<select id="resultr-option"
-								data-bind="attr : { 'name' : 'wrap.results[' + \$index() + '].selectedOption' },
-								foreach: options">
-							<option data-bind="attr: { name : value, selected : (\$parent.defaultValue === value) }, text: label"></option>
+						<span data-bind="if:title && title.toUpperCase() === 'TEST RESULT VALUE'">
+							<label style="color:#ff3d3d;" data-bind="text: container"></label>						
+						</span>
+						
+						<span data-bind="if:title && title.toUpperCase() !== 'TEST RESULT VALUE'">
+							<label style="color:#ff3d3d;" data-bind="text: title"></label>						
+						</span>
+						
+						<select id="result-option" 
+							data-bind="attr : { 'name' : 'wrap.results[' + \$index() + '].selectedOption' },
+								foreach: options" style="width: 98%;">
+							<option data-bind="attr: { name : value, selected : (\$parent.defaultValue === label) }, text: label"></option>
 						</select>
 					</p>
 				</div>
@@ -212,23 +222,32 @@
 					</p>
 				</div>
 				
-				<!--Other Inputs-->
+				<!--Other Input Types-->
 				<div data-bind="if:(type && type.toLowerCase() !== 'select') && (type && type.toLowerCase() !== 'radio') && (type && type.toLowerCase() !== 'checkbox')">
-					<p>
-						<label for="result-text" data-bind="text: title" style="color:#ff3d3d;"></label>
+					<p id="data">
+						<span data-bind="if:title && title.toUpperCase() === 'WRITE COMMENT'">
+							<label data-bind="text: title + ' (' + container+')'" style="color:#ff3d3d;"></label>
+						</span>
+						
+						<span data-bind="if:title && title.toUpperCase() !== 'WRITE COMMENT'">
+							<label data-bind="text: title" style="color:#ff3d3d;"></label>
+						</span>
+						
 						<input class="result-text" data-bind="attr : { 'type' : type, 'name' : 'wrap.results[' + \$index() + '].value', value : defaultValue }" >
 					</p>
 				</div>
 				
 				<div data-bind="if: !type">
-					<label for="result-text" data-bind="text: title"></label>
-					<input id="result-text" class="result-text" type="text" data-bind="attr : { 'name' : 'wrap.results[' + \$index() + '].value' }" >
+					<p>
+						<label for="result-text" data-bind="text: title"></label>
+						<input class="result-text" type="text" data-bind="attr : {'name' : 'wrap.results[' + \$index() + '].value', value : defaultValue }" >
+					</p>
 				</div>
 			</div>
 		</form>
 		
-		<span class="button confirm right"> Save Results </span>
-        <span class="button cancel"> Cancel </span>
+		<span class="button confirm right">Save Results</span>
+        <span class="button cancel">Cancel</span>
 	</div>
 	
     

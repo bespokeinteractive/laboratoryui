@@ -62,7 +62,6 @@ public class LaboratoryUtil {
 	 */
 	public static List<TestModel> generateModelsFromOrders(List<Order> orders,
 			Map<Concept, Set<Concept>> testTreeMap) {
-
 		List<TestModel> models = new ArrayList<TestModel>();
 		for (Order order : orders) {
 			TestModel tm = generateModel(order, testTreeMap);
@@ -481,14 +480,15 @@ public class LaboratoryUtil {
 	 */
 	public static void generateParameterModels(List<ParameterModel> parameters,
 			Concept concept,
+			Concept parentConcept,
 			Encounter encounter) {
 		if (concept.getConceptClass().getName().equalsIgnoreCase("LabSet")) {
 			List<Concept> concepts = getParameterConcepts(concept);
 			for (Concept c : concepts) {
-				generateParameterModels(parameters, c, encounter);
+				generateParameterModels(parameters, c, concept, encounter);
 			}
 		} else {
-			ParameterModel parameter = generateParameterModel(concept, encounter);
+			ParameterModel parameter = generateParameterModel(concept, parentConcept, encounter);
 			parameters.add(parameter);
 		}
 	}
@@ -503,23 +503,25 @@ public class LaboratoryUtil {
 		return concepts;
 	}
 
-	private static ParameterModel generateParameterModel(Concept concept, Encounter encounter) {
+	private static ParameterModel generateParameterModel(Concept concept, Concept parentConcept,Encounter encounter) {
 		ParameterModel parameter = new ParameterModel();
-		setDefaultParameterValue(concept, encounter, parameter);
+		parameter.setId(concept.getConceptId().toString());
+		if (parentConcept != null) {
+			parameter.setContainer(parentConcept.getDisplayString());
+			parameter.setContainerId(parentConcept.getId());
+		}
+		setDefaultParameterValue(concept, parentConcept, encounter, parameter);
 		if (concept.getDatatype().getName().equalsIgnoreCase("Text")) {
-			parameter.setId(concept.getName().getName().trim());
 			parameter.setType("text");
 		} else if (concept.getDatatype().getName().equalsIgnoreCase("Numeric")) {
-			parameter.setId(concept.getName().getName().trim());
 			parameter.setType("number");
 			parameter.setUnit(getUnit(concept));
 		} else if (concept.getDatatype().getName().equalsIgnoreCase("Coded")) {
-			parameter.setId(concept.getName().getName().trim());
 			parameter.setType("select");
 
 			for (ConceptAnswer ca : concept.getAnswers()) {
 				Concept c = ca.getAnswerConcept();
-				parameter.addOption(new ParameterOption(c.getName().getName(), c.getName().getName()));
+				parameter.addOption(new ParameterOption(c.getName().getName(), c.getId().toString()));
 			}
 		}
 		parameter.setValidator(" required");
@@ -527,10 +529,16 @@ public class LaboratoryUtil {
 		return parameter;
 	}
 
-	private static void setDefaultParameterValue(Concept concept, Encounter encounter, ParameterModel parameter) {
+	private static void setDefaultParameterValue(Concept concept, Concept parentConcept, Encounter encounter, ParameterModel parameter) {
 		if (encounter != null) {
 			for (Obs obs : encounter.getAllObs()) {
-				if (concept.equals(obs.getConcept())) {
+				if (parentConcept != null && 
+					obs.getObsGroup() != null &&
+					obs.getObsGroup().getConcept().equals(parentConcept) && 
+					obs.getConcept().equals(concept)) {
+					parameter.setDefaultValue(obs.getValueAsString(Context.getLocale()));
+					break;
+				} else if (concept.equals(obs.getConcept()) && obs.getObsGroup() == null) {
 					parameter.setDefaultValue(obs.getValueAsString(Context.getLocale()));
 					break;
 				}

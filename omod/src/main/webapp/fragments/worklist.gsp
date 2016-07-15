@@ -88,7 +88,6 @@
 			
 			resultDialog.show();
 		});
-		
 	}
 	
 	function saveResult(){
@@ -323,14 +322,22 @@
 			</div>
 			
 			<div data-bind="foreach: parameterOptions">
-				<input type="hidden" data-bind="attr: { 'name' : 'wrap.results[' + \$index() + '].conceptName' }, value: title" >
+				<input type="hidden" data-bind="attr: { 'name' : 'wrap.results[' + \$index() + '].conceptName' }, value: containerId?containerId+'.'+id:id" >
 				
+				<!--Test for Select-->
 				<div data-bind="if:type && type.toLowerCase() === 'select'">
 					<p>
-						<label for="result-option" class="dialog-data input-position-class" data-bind="text: title"></label>
+						<span data-bind="if:title && title.toUpperCase() === 'TEST RESULT VALUE'">
+							<label style="color:#ff3d3d;" data-bind="text: container"></label>						
+						</span>
+						
+						<span data-bind="if:title && title.toUpperCase() !== 'TEST RESULT VALUE'">
+							<label style="color:#ff3d3d;" data-bind="text: title"></label>						
+						</span>
+						
 						<select id="result-option" 
 							data-bind="attr : { 'name' : 'wrap.results[' + \$index() + '].selectedOption' },
-								foreach: options">
+								foreach: options" style="width: 98%;">
 							<option data-bind="attr: { name : value, selected : (\$parent.defaultValue === value) }, text: label"></option>
 						</select>
 					</p>
@@ -350,8 +357,15 @@
 				<!--Other Input Types-->
 				<div data-bind="if:(type && type.toLowerCase() !== 'select') && (type && type.toLowerCase() !== 'radio') && (type && type.toLowerCase() !== 'checkbox')">
 					<p id="data">
-						<label for="result-text" data-bind="text: title" style="color:#ff3d3d;"></label>
-						<input id="result-text" class="result-text" data-bind="attr : { 'type' : type, 'name' : 'wrap.results[' + \$index() + '].value', value : defaultValue }" >
+						<span data-bind="if:title && title.toUpperCase() === 'WRITE COMMENT'">
+							<label data-bind="text: title + ' (' + container+')'" style="color:#ff3d3d;"></label>
+						</span>
+						
+						<span data-bind="if:title && title.toUpperCase() !== 'WRITE COMMENT'">
+							<label data-bind="text: title" style="color:#ff3d3d;"></label>
+						</span>
+						
+						<input class="result-text" data-bind="attr : { 'type' : type, 'name' : 'wrap.results[' + \$index() + '].value', value : defaultValue }" >
 					</p>
 				</div>
 				
@@ -364,8 +378,8 @@
 			</div>
 		</form>
 		
-		<span class="button confirm right"> Confirm </span>
-        <span class="button cancel"> Cancel </span>
+		<span class="button confirm right">Confirm</span>
+        <span class="button cancel">Cancel</span>
 	</div>
 	
 	

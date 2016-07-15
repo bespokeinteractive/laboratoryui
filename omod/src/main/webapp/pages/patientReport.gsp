@@ -157,14 +157,18 @@
 			<tr data-bind="if: (level && level.toUpperCase() === 'LEVEL_INVESTIGATION')">
 				<td colspan="5"><b data-bind="text: investigation"></b></td>
 			</tr>
+
+			<tr data-bind="if: (level && level.toUpperCase() === 'LEVEL_SET')">
+				<td colspan="5"><b data-bind="text: '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + set"></b></td>
+			</tr>
 			
-			<tr data-bind="if: (level && level.toUpperCase() === 'LEVEL_SET') || (level && level.toUpperCase() === 'LEVEL_TEST')">
-				<td data-bind="text: '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + set"></td>
+			<tr data-bind="if: (level && level.toUpperCase() === 'LEVEL_TEST')">
+				<td data-bind="text: '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + test"></td>
 				<td data-bind="text: value"></td>
 				<td data-bind="text: unit"></td>
 				<td>
 					<div data-bind="if: (lowNormal || hiNormal)">
-						<span data-bind="text: 'Adult/Male:' + lowNormal} + '//' + hiNormal"></span>
+						<span data-bind="text: 'Adult/Male:' + lowNormal + '//' + hiNormal"></span>
 					</div>
 					<div data-bind="if: (lowCritical || lowCritical)">
 						<span data-bind="text: 'Female:' + lowCritical + '//' + hiCritical"></span>
