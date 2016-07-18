@@ -109,8 +109,6 @@
 				showToast=true;
 			}
 			
-			console.log(showToast);
-			
 			var date = moment(jq('#accepted-date-edit-field').val()).format('DD/MM/YYYY');
             var searchResultsFor = jq("#search-results-for").val();
             var investigation = jq("#investigation-results").val();
@@ -296,6 +294,10 @@
 	}
 	.dialog select option {
 		font-size: 1em;
+	}
+	#modal-overlay {
+		background: #000 none repeat scroll 0 0;
+		opacity: 0.4 !important;
 	}
 </style>
 <header>

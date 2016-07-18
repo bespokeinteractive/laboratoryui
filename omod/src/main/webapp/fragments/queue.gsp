@@ -41,6 +41,10 @@
 
 	jq(function(){
 		acceptDialog = emr.setupConfirmationDialog({
+			dialogOpts: {
+				overlayClose: false,
+				close: true
+			},
 			selector: '#accept-form',
 			actions: {
 				confirm: function() {
@@ -58,6 +62,10 @@
 
 	jq(function(){
 		rescheduleDialog = emr.setupConfirmationDialog({
+			dialogOpts: {
+				overlayClose: false,
+				close: true
+			},
 			selector: '#reschedule-form',
 			actions: {
 				confirm: function() {
@@ -85,7 +93,6 @@
 					var rescheduledTest = ko.utils.arrayFirst(queueData.tests(), function(item) {
 						return item.orderId == orderId.val();
 					});
-					console.log(rescheduledTest);
 					queueData.tests.remove(rescheduledTest);
 				}
 			},

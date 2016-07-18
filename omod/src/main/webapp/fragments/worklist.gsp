@@ -15,6 +15,10 @@
 		ko.applyBindings(parameterOpts, jq("#result-form")[0]);
 		
 		resultDialog = emr.setupConfirmationDialog({
+			dialogOpts: {
+				overlayClose: false,
+				close: true
+			},
 			selector: '#result-form',
 			actions: {
 				confirm: function() {
@@ -35,6 +39,10 @@
 	
 	jq(function(){
 		reorderDialog = emr.setupConfirmationDialog({
+			dialogOpts: {
+				overlayClose: false,
+				close: true
+			},
 			selector: '#reorder-form',
 			actions: {
 				confirm: function() {
@@ -60,7 +68,7 @@
 		selectedTestDetails = testDetail;
 		getResultTemplate(testDetail.testId);
 		resultForm.find("#test-id").val(testDetail.testId);
-		resultDialog.show();
+		
 	}
 	
 	function getResultTemplate(testId) {
@@ -77,6 +85,8 @@
 				parameterOption['startDate'] = details.startDate;
 				parameterOpts.parameterOptions.push(parameterOption);
 			});
+			
+			resultDialog.show();
 		});
 	}
 	
@@ -137,7 +147,6 @@
 	jq(function(){
 		var worksheet = { items : ko.observableArray([]) };
 		ko.applyBindings(worksheet, jq("#worksheet")[0]);
-		jq("#worksheet").hide();
 		jq("#print-worklist").on("click", function() {
 			jq.getJSON('${ui.actionLink("laboratoryapp", "worksheet", "getWorksheet")}',
 				{ 
@@ -156,15 +165,30 @@
 		});
 		
 		jq("#export-worklist").on("click", function() {
-			window.location = "/" + OPENMRS_CONTEXT_PATH + "/module/laboratory/download.form?" +
-				"date=" + moment(jq('#accepted-date-field').val()).format('DD/MM/YYYY') + "&phrase=" + jq("#search-worklist-for").val() +
-				"&investigation=" + jq("#investigation").val() +
-				"&showResults=" + jq("#include-result").is(":checked");
+			var downloadLink = 
+				emr.pageLink("laboratoryapp", "reportExport", 
+					{
+						"worklistDate" : 
+							moment(jq('#accepted-date-field').val()).format('DD/MM/YYYY'),
+						"phrase": jq("#search-worklist-for").val(),
+						"investigation": jq("#investigation-worklist").val(),
+						"includeResults": jq("#include-result").is(":checked")
+					}
+				);
+			var win = window.open(downloadLink, '_blank');
+			if(win){
+				//Browser has allowed it to be opened
+				win.focus();
+			}else{
+				//Broswer has blocked it
+				alert('Please allow popups for this site');
+			}
 		});
 	});
 
 	function printData() {
 		jq("#worksheet").print({
+				globalStyles: false,
 				mediaPrint: false,
 				stylesheet: '${ui.resourceLink("referenceapplication","styles/referenceapplication.css")}',
 				iframe: true
@@ -298,14 +322,22 @@
 			</div>
 			
 			<div data-bind="foreach: parameterOptions">
-				<input type="hidden" data-bind="attr: { 'name' : 'wrap.results[' + \$index() + '].conceptName' }, value: title" >
+				<input type="hidden" data-bind="attr: { 'name' : 'wrap.results[' + \$index() + '].conceptName' }, value: containerId?containerId+'.'+id:id" >
 				
+				<!--Test for Select-->
 				<div data-bind="if:type && type.toLowerCase() === 'select'">
 					<p>
-						<label for="result-option" class="dialog-data input-position-class" data-bind="text: title"></label>
+						<span data-bind="if:title && title.toUpperCase() === 'TEST RESULT VALUE'">
+							<label style="color:#ff3d3d;" data-bind="text: container"></label>						
+						</span>
+						
+						<span data-bind="if:title && title.toUpperCase() !== 'TEST RESULT VALUE'">
+							<label style="color:#ff3d3d;" data-bind="text: title"></label>						
+						</span>
+						
 						<select id="result-option" 
 							data-bind="attr : { 'name' : 'wrap.results[' + \$index() + '].selectedOption' },
-								foreach: options">
+								foreach: options" style="width: 98%;">
 							<option data-bind="attr: { name : value, selected : (\$parent.defaultValue === value) }, text: label"></option>
 						</select>
 					</p>
@@ -325,8 +357,15 @@
 				<!--Other Input Types-->
 				<div data-bind="if:(type && type.toLowerCase() !== 'select') && (type && type.toLowerCase() !== 'radio') && (type && type.toLowerCase() !== 'checkbox')">
 					<p id="data">
-						<label for="result-text" data-bind="text: title" style="color:#ff3d3d;"></label>
-						<input id="result-text" class="result-text" data-bind="attr : { 'type' : type, 'name' : 'wrap.results[' + \$index() + '].value', value : defaultValue }" >
+						<span data-bind="if:title && title.toUpperCase() === 'WRITE COMMENT'">
+							<label data-bind="text: title + ' (' + container+')'" style="color:#ff3d3d;"></label>
+						</span>
+						
+						<span data-bind="if:title && title.toUpperCase() !== 'WRITE COMMENT'">
+							<label data-bind="text: title" style="color:#ff3d3d;"></label>
+						</span>
+						
+						<input class="result-text" data-bind="attr : { 'type' : type, 'name' : 'wrap.results[' + \$index() + '].value', value : defaultValue }" >
 					</p>
 				</div>
 				
@@ -339,8 +378,8 @@
 			</div>
 		</form>
 		
-		<span class="button confirm right"> Confirm </span>
-        <span class="button cancel"> Cancel </span>
+		<span class="button confirm right">Confirm</span>
+        <span class="button cancel">Cancel</span>
 	</div>
 	
 	
@@ -390,16 +429,23 @@
 <!-- Worsheet -->
 <table id="worksheet">
 	<thead>
-		<th>Order Date</th>
-		<th>Patient Identifier</th>
-		<th>Name</th>
-		<th>Age</th>
-		<th>Gender</th>
-		<th>Sample Id</th>
-		<th>Lab</th>
-		<th>Test</th>
-		<th>Result</th>
+		<tr>
+			<th>Order Date</th>
+			<th>Patient Identifier</th>
+			<th>Name</th>
+			<th>Age</th>
+			<th>Gender</th>
+			<th>Sample Id</th>
+			<th>Lab</th>
+			<th>Test</th>
+			<th>Result</th>
+		</tr>
 	</thead>
+	<tbody data-bind="if: items().length == 0">
+		<tr>
+			<td colspan="9">No processed/pending test</td>
+		</tr>
+	</tbody>
 	<tbody data-bind="foreach: items">
 		<tr>
 			<td data-bind="text: startDate"></td>
@@ -419,5 +465,8 @@
 <style>
 .margin-left {
 	margin-left: 10px;
+}
+#worksheet {
+	display: none;
 }
 </style>

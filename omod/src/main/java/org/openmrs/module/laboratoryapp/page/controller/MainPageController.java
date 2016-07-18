@@ -16,12 +16,17 @@ import java.util.Set;
  * Created by Dennys Henry on 2/18/2016.
  */
 public class MainPageController {
-    public void get( UiSessionContext sessionContext,
+    public String get( UiSessionContext sessionContext,
                     PageModel model,
                     PageRequest pageRequest,
                     UiUtils ui) {
         pageRequest.getSession().setAttribute(ReferenceApplicationWebConstants.SESSION_ATTRIBUTE_REDIRECT_URL,ui.thisUrl());
         sessionContext.requireAuthentication();
+        Boolean isPriviledged = Context.hasPrivilege("Access Laboratory");
+        if(!isPriviledged){
+            return "redirect: index.htm";
+        }
         model.addAttribute("date", new Date());
+        return null;
     }
 }

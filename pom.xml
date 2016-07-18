@@ -1,10 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.openmrs.module</groupId>
 	<artifactId>laboratoryapp</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.0</version>
 	<packaging>pom</packaging>
 	<name>Laboratory Module</name>
 	<description>Laboratory Module</description>
@@ -72,14 +71,14 @@
 			<dependency>
 				<groupId>org.openmrs.module</groupId>
 				<artifactId>hospitalcore-api</artifactId>
-				<version>1.5.1</version>
+				<version>1.5.3</version>
 				<scope>provided</scope>
 			</dependency>
 			
 			<dependency>
 				<groupId>org.openmrs.module</groupId>
 				<artifactId>laboratory-api</artifactId>
-				<version>0.6.0</version>
+				<version>0.6.2</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
@@ -147,6 +146,12 @@
 						
 			<!-- End OpenMRS core -->
 
+			<dependency>
+				<groupId>org.apache.poi</groupId>
+				<artifactId>poi</artifactId>
+				<version>3.6</version>
+				<scope>provided</scope>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -170,6 +175,17 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
 					<version>2.4</version>
+				</plugin>
+				<plugin>
+					<groupId>external.atlassian.jgitflow</groupId>
+					<artifactId>jgitflow-maven-plugin</artifactId>
+					<version>1.0-m5</version>
+					<configuration>
+						<noDeploy>true</noDeploy>
+						<flowInitContext>
+							<developBranchName>qa</developBranchName>
+						</flowInitContext>
+					</configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>

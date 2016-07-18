@@ -29,6 +29,8 @@ public class ParameterModel implements Comparable<ParameterModel> {
 	private String id;
 	private String type;
 	private String title;
+	private String container;
+	private Integer containerId;
 	private List<ParameterOption> options = new ArrayList<ParameterOption>();
 	private String defaultValue;
 	private String unit;
@@ -74,6 +76,22 @@ public class ParameterModel implements Comparable<ParameterModel> {
 		this.title = title;
 	}
 
+	public String getContainer() {
+		return container;
+	}
+	
+	public void setContainer(String container) {
+		this.container = container;
+	}
+	
+	public Integer getContainerId() {
+		return containerId;
+	}
+	
+	public void setContainerId(Integer containerId) {
+		this.containerId = containerId;
+	}
+
 	public String getUnit() {
 		return unit;
 	}
@@ -90,14 +108,14 @@ public class ParameterModel implements Comparable<ParameterModel> {
 		this.validator = validator;
 	}
 
-	public int compareTo(ParameterModel o) {
-		if (StringUtils.isBlank(o.getId()))
+	public int compareTo(ParameterModel otherParameterModel) {
+		if (otherParameterModel.getContainerId() == null)
 			return 1;
-		if (StringUtils.isBlank(this.getId()))
+		if (this.getContainerId() == null)
 			return -1;
-		String thisId = id;
-		String oId = o.getId();
-		return thisId.compareToIgnoreCase(oId);
+		Integer thisContainerId = containerId;
+		Integer otherContainerId = otherParameterModel.getContainerId();
+		return thisContainerId.compareTo(otherContainerId);
 	}
 
 	public String toString() {
