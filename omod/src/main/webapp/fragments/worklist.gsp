@@ -79,7 +79,12 @@
 			var details = ko.utils.arrayFirst(workList.items(), function(item) {
 				return item.testId == testId;
 			});
+			
 			jq.each(parameterOptions, function(index, parameterOption) {
+				if (parameterOption.options.length > 0){
+					parameterOption.options.splice(0, 0, {"label":"SELECT OPTION...","value":""})
+				}
+			
 				parameterOption['patientName'] = details.patientName;
 				parameterOption['testName'] = details.test.name;
 				parameterOption['startDate'] = details.startDate;
@@ -335,10 +340,8 @@
 							<label style="color:#ff3d3d;" data-bind="text: title"></label>						
 						</span>
 						
-						<select id="result-option" 
-							data-bind="attr : { 'name' : 'wrap.results[' + \$index() + '].selectedOption' },
-								foreach: options" style="width: 98%;">
-							<option data-bind="attr: { name : value, selected : (\$parent.defaultValue === value) }, text: label"></option>
+						<select id="result-option" data-bind="attr : { 'name' : 'wrap.results[' + \$index() + '].selectedOption' }, foreach: options" style="width: 98%;">
+							<option data-bind="attr: { value : value, selected : (\$parent.defaultValue === value) }, text: label"></option>
 						</select>
 					</p>
 				</div>

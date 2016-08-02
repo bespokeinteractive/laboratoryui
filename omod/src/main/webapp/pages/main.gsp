@@ -293,7 +293,8 @@
 		width: 255px;
 	}
 	.dialog select option {
-		font-size: 1em;
+		font-size: 		1em;
+		padding-left: 	10px;
 	}
 	#modal-overlay {
 		background: #000 none repeat scroll 0 0;
