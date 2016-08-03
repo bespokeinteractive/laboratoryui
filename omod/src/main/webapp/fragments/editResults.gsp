@@ -51,7 +51,7 @@
 			});
 			jq.each(editResultsParameterOptions, function(index, editResultsParameterOption) {
 				if (editResultsParameterOption.options.length > 0){
-					editResultsParameterOption.options.splice(0, 0, {"label":"SELECT OPTION...","value":""})
+					editResultsParameterOption.options.splice(0, 0, {"label":"- SELECT RESULT -", "value":""})
 				}
 				
 				editResultsParameterOption['patientName'] = details.patientName;

@@ -82,7 +82,7 @@
 			
 			jq.each(parameterOptions, function(index, parameterOption) {
 				if (parameterOption.options.length > 0){
-					parameterOption.options.splice(0, 0, {"label":"SELECT OPTION...","value":""})
+					parameterOption.options.splice(0, 0, {"label":"- SELECT RESULT -", "value":""})
 				}
 			
 				parameterOption['patientName'] = details.patientName;
