@@ -50,6 +50,10 @@
 				return item.testId == testId;
 			});
 			jq.each(editResultsParameterOptions, function(index, editResultsParameterOption) {
+				if (editResultsParameterOption.options.length > 0){
+					editResultsParameterOption.options.splice(0, 0, {"label":"- SELECT RESULT -", "value":""})
+				}
+				
 				editResultsParameterOption['patientName'] = details.patientName;
 				editResultsParameterOption['testName'] = details.test.name;
 				editResultsParameterOption['startDate'] = details.startDate;
@@ -206,7 +210,7 @@
 						<select id="result-option" 
 							data-bind="attr : { 'name' : 'wrap.results[' + \$index() + '].selectedOption' },
 								foreach: options" style="width: 98%;">
-							<option data-bind="attr: { name : value, selected : (\$parent.defaultValue === label) }, text: label"></option>
+							<option data-bind="attr: { value : value, selected : (\$parent.defaultValue === label) }, text: label"></option>
 						</select>
 					</p>
 				</div>

@@ -76,6 +76,11 @@ public class ResultFragmentController {
 		
 		for (ResultModel resultModel : resultWrapper.getResults()) {
 			String result = resultModel.getSelectedOption() == null ? resultModel.getValue() : resultModel.getSelectedOption();
+
+			if (StringUtils.isBlank(result)){
+				continue;
+			}
+
 			if (StringUtils.contains(resultModel.getConceptName(), ".")) {
 				String[] parentChildConceptIds = StringUtils.split(resultModel.getConceptName(), ".");
 				Concept testGroupConcept = Context.getConceptService().getConcept(parentChildConceptIds[0]);
