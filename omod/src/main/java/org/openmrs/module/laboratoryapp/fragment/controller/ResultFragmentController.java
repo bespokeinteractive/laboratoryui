@@ -37,7 +37,9 @@ public class ResultFragmentController {
 		LabTest test = ls.getLaboratoryTest(testId);		
 		List<ParameterModel> parameters = new ArrayList<ParameterModel>();
 		LaboratoryUtil.generateParameterModels(parameters, test.getConcept(), null, test.getEncounter());
-		Collections.sort(parameters);
+
+		//Collections.sort(parameters);
+
 		List<SimpleObject> resultsTemplate = new ArrayList<SimpleObject>();
 		for (ParameterModel parameter : parameters) {
 			SimpleObject resultTemplate = new SimpleObject();

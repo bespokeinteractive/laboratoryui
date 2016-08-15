@@ -102,7 +102,7 @@
         <fieldset>
 			<div class="onerow">
 				<div class="col4">
-					<label for="accepted-date-edit-display">Date </label>
+					<label for="accepted-date-edit-display">Date</label>
 				</div>
 				
 				<div class="col4">
