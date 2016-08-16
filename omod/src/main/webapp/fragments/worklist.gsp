@@ -3,6 +3,12 @@
 		resultForm,
 		selectedTestDetails,
 		parameterOpts = { parameterOptions : ko.observableArray([]) };
+		
+		var ExamModel= function(){
+			var self = this;
+			self.exams = parameterOpts.distinct('containerId');			
+		
+		};
 	
 	var reorderDialog, reorderForm;
 	var scheduleDate = jq("#reorder-date");
@@ -12,6 +18,8 @@
 	
 	jq(function(){
 		orderIdd = jq("#order");
+		
+		//ko.applyBindings(parameterOpts, jq("#result-form")[0]);
 		ko.applyBindings(parameterOpts, jq("#result-form")[0]);
 		
 		resultDialog = emr.setupConfirmationDialog({
@@ -328,6 +336,13 @@
 			
 			<div data-bind="foreach: parameterOptions">
 				<input type="hidden" data-bind="attr: { 'name' : 'wrap.results[' + \$index() + '].conceptName' }, value: containerId?containerId+'.'+id:id" >
+				
+				<div data-bind="if:container !== 'null' && container !== testName">
+					<span data-bind="text:containerId"></span>
+					
+					
+				</div>
+				
 				
 				<!--Test for Select-->
 				<div data-bind="if:type && type.toLowerCase() === 'select'">
