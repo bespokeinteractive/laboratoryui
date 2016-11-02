@@ -6,6 +6,7 @@
     var dataTable;
     var billableServices;
     var serviceIds = [];
+	
     jQuery(document).ready(function() {
         jq('#functionalStatus').on('change', 'input.service-status', function() {
             var index = jq.inArray(jq(this).val(), serviceIds);

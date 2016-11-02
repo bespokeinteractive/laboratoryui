@@ -4,13 +4,38 @@
 		selectedTestDetails,
 		parameterOpts = { parameterOptions : ko.observableArray([]) };
 		
-		var ExamModel= function(){
-			var self = this;
-			self.exams = parameterOpts.distinct('containerId');			
-		
-		};
 	
-	var reorderDialog, reorderForm;
+	ko.observableArray.fn.distinct = function(prop) {
+		var target = this;
+		target.index = {};
+		target.index[prop] = ko.observable({});    
+		
+		ko.computed(function() {
+			//rebuild index
+			var propIndex = {};
+			
+			ko.utils.arrayForEach(target(), function(item) {
+				var key = ko.utils.unwrapObservable(item[prop]);
+				console.log("key: " + key)
+				if (key) {
+					propIndex[key] = propIndex[key] || [];
+					propIndex[key].push(item);            
+				}
+			});   
+			
+			target.index[prop](propIndex);
+		});
+		console.log("target" + target);
+		return target;
+	};
+	
+	var ExamModel= function(){
+		var self = this;		
+		self.exams = ko.observableArray(parameterOpts.parameterOptions()).distinct('containerId');
+		self.optts = ko.observableArray([]);
+	};
+
+	var reorderDialog, reorderForm, exam;
 	var scheduleDate = jq("#reorder-date");
 	var orderIdd;
 	var details = { 'patientName' : 'Patient Name', 'startDate' : 'Start Date', 'test' : { 'name' : 'Test Name' } }; 
@@ -18,9 +43,11 @@
 	
 	jq(function(){
 		orderIdd = jq("#order");
+		exam = new ExamModel();
 		
-		//ko.applyBindings(parameterOpts, jq("#result-form")[0]);
-		ko.applyBindings(parameterOpts, jq("#result-form")[0]);
+		
+		ko.applyBindings(parameterOpts, jq("#result-form-content")[0]);
+		ko.applyBindings(exam, jq("#kotests")[0]);
 		
 		resultDialog = emr.setupConfirmationDialog({
 			dialogOpts: {
@@ -100,6 +127,19 @@
 			});
 			
 			resultDialog.show();
+			
+			
+			var options = exam.exams().map(function(item) { return item["containerId"]; });
+			exam.optts(options.filter(function(v,i) { return options.indexOf(v) == i; }));
+			
+			//ko.applyBindings(exam, jq("#kotests")[0]);
+			
+			//console.log(exam.exams());
+			//console.log(exam.optts);
+			
+			
+			
+			//
 		});
 	}
 	
@@ -308,13 +348,27 @@
 	</tbody>
 </table>
 
+
+
 <div id="result-form" title="Results" class="dialog">
 	<div class="dialog-header">
       <i class="icon-list-ul"></i>
       <h3>Edit Results</h3>
     </div>
 	
-	<div class="dialog-content">
+	<div id="kotests">
+		KOTESTS
+		<ul data-bind="foreach: optts">
+			<li>
+				<h2 data-bind="text: \$data"></h2>
+				<ul data-bind="foreach: _.filter(\$root.exams(), function(exam) { return exam.containerId == \$data })">
+					<span data-bind="text: \$root.exams().container"></span>exan<br/>
+				</ul>
+			</li>
+		</ul>
+	</div>
+	
+	<div class="dialog-content" id="result-form-content">
 		<form>
 			<input type="hidden" name="wrap.testId" id="test-id" />
 			<div data-bind="if: parameterOptions()[0]">
@@ -333,6 +387,13 @@
 					<div class="inline" data-bind="text: parameterOptions()[0].startDate"></div>
 				</p>
 			</div>
+			
+			
+			
+			
+			
+			
+			
 			
 			<div data-bind="foreach: parameterOptions">
 				<input type="hidden" data-bind="attr: { 'name' : 'wrap.results[' + \$index() + '].conceptName' }, value: containerId?containerId+'.'+id:id" >
